@@ -4,29 +4,30 @@ using System.Reflection;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 
 using Konata.Core.Packet;
 using Konata.Core.Event;
+using Konata.Runtime;
 using Konata.Runtime.Base;
 using Konata.Runtime.Base.Event;
 using Konata.Runtime.Network;
-using Konata.Runtime;
-using System.Threading.Tasks;
 
 namespace Konata.Core.Service
 {
     [Service("消息解析服务", "全局消息解析服务，用于消息序列化/反序列化")]
     class PacketService : ILoad, IDisposable
     {
-        private List<SSOServiceAttribute> _ssoServiceInfo = null;
-        private Dictionary<string, ISSOService> _ssoServiceList = null;
+        private List<SSOServiceAttribute> _ssoServiceInfo;
+        private Dictionary<string, ISSOService> _ssoServiceList;
 
         private TransformBlock<EventServiceMessage, EventSsoFrame> _serviceMsgTransformBlock;
         private TransformBlock<SocketPackage, EventServiceMessage> _socketMsgTransformBlock;
 
         private ActionBlock<EventSsoFrame> _ssoMsgActionBlock;
         private ActionBlock<KonataEventArgs> _eventActionBlock;
+
         /// <summary>
         /// Service Onload
         /// </summary>
@@ -146,8 +147,9 @@ namespace Konata.Core.Service
                         {
                             if (output != null)
                             {
-                                SocketService socketservice = ServiceManager.Instance.GetService<SocketService>();
-                                socketservice.SendSocketPackage(eventMessage.Owner, output);
+                                ServiceManager.Instance
+                                    .GetService<SocketService>()
+                                    .SendData(eventMessage.Owner, output);
                             }
                         }
                     }

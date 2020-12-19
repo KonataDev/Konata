@@ -48,7 +48,7 @@ namespace Konata.Runtime.Base
             if (_eventInstance == null)
             {
                 _instanceLock = new ReaderWriterLockSlim();
-                IReadOnlyDictionary<CoreEventType, EventInfo> eventinfos = EventManager.Instance.GetCoreEventInfo();
+                var eventinfos = EventManager.Instance.GetCoreEventInfo();
 
                 _eventInstance = new Dictionary<CoreEventType, EventContainer>(new EnumComparer<CoreEventType>());
                 //需要针对当前子容器进行事件列表初始化
@@ -59,8 +59,12 @@ namespace Konata.Runtime.Base
                     {
                         obj = (IEvent)Activator.CreateInstance(valuePair.Value.Type);
                     }
-                    EventContainer container = new EventContainer { Info = valuePair.Value, Event = obj };
-                    _eventInstance.Add(valuePair.Key, container);
+
+                    _eventInstance.Add(valuePair.Key, new EventContainer
+                    {
+                        Event = obj,
+                        Info = valuePair.Value
+                    });
                 }
 
                 _blockCancel = new CancellationTokenSource();
