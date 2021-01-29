@@ -1,11 +1,11 @@
 ﻿using System;
 
-namespace Konata.Core.Packet
+namespace Konata.Core.Attribute
 {
     /// <summary>
     /// SSO Service Attribute
     /// </summary>
-    public class SSOServiceAttribute : Attribute
+    public class SSOServiceAttribute : System.Attribute
     {
         public string ServiceName { get; set; } = "";
 

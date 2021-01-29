@@ -13,7 +13,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="Component\BusinessComponent.cs~RF24ddb0e3.TMP" />
     <None Remove="Event\EventOnlineStatus.cs~RF784d311d.TMP" />
+    <None Remove="Component\BusinessManager.cs~RF24d404ef.TMP" />
+    <None Remove="Event\LogEvent.cs~RF24ffc0eb.TMP" />
   </ItemGroup>
 
   <ItemGroup>

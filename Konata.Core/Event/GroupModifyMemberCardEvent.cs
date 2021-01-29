@@ -1,10 +1,8 @@
 ﻿using System;
 
-using Konata.Runtime.Base.Event;
-
 namespace Konata.Core.Event
 {
-    public class EventGroupModifyMemberCard : KonataEventArgs
+    public class GroupModifyMemberCardEvent : BaseEvent
     {
         /// <summary>
         /// <b>[In]</b>          <br/>

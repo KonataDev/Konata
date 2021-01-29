@@ -20,6 +20,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Konata.TestBench", "Konata.
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Blueprint", "Blueprint", "{4FA698FA-02D0-4749-BA5F-18D919A9887B}"
 	ProjectSection(SolutionItems) = preProject
+		Blueprint\konata.framework.svg = Blueprint\konata.framework.svg
 		Blueprint\manager.ssoinfo.sequence.svg = Blueprint\manager.ssoinfo.sequence.svg
 		Blueprint\messaging.incoming.svg = Blueprint\messaging.incoming.svg
 		Blueprint\messaging.outgoing.svg = Blueprint\messaging.outgoing.svg

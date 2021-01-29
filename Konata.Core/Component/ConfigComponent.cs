@@ -1,19 +1,17 @@
 ﻿using System;
-using System.Text;
 using System.Linq;
+using System.Text;
 using System.Security.Cryptography;
 
+using Konata.Core.Attribute;
 using Konata.Core.Packet.Oicq;
-using Konata.Packets.Protobuf;
-using Konata.Runtime.Base;
 using Konata.Utils.Crypto;
+using Konata.Packets.Protobuf;
 
 namespace Konata.Core.Manager
 {
-    /// <summary>
-    /// 登录信息
-    /// </summary>
-    public class UserSigManager : Component
+    [Component("ConfigComponent", "Konata Config Management Component")]
+    public class ConfigComponent : BaseComponent
     {
         public uint Uin { get; private set; }
 
@@ -105,6 +103,17 @@ namespace Konata.Core.Manager
         public byte[] WtSessionTicketKey { get; set; }
 
         #endregion
+
+
+        public ConfigComponent()
+        {
+
+        }
+
+        public ConfigComponent(BotConfig config)
+        {
+
+        }
 
         public void InitializeProfile(uint uin, string password)
         {

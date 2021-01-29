@@ -4,7 +4,7 @@ using Konata.Runtime.Base.Event;
 
 namespace Konata.Core.Event
 {
-    public class EventWtLogin : KonataEventArgs
+    public class WtLoginEvent : BaseEvent
     {
         public enum Type
         {
@@ -69,45 +69,14 @@ namespace Konata.Core.Event
             InvalidSmsCode,
         }
 
-        public class Info
-        {
-            public uint Age { get; set; }
-
-            public uint Face { get; set; }
-
-            public string Name { get; set; }
-        }
-
         public Type EventType { get; set; }
 
-        public string WtLoginSession { get; set; }
+        public string SmsPhone { get; set; }
 
-        public string WtLoginSmsToken { get; set; }
+        public string SmsCountry { get; set; }
 
-        public string WtLoginSmsPhone { get; set; }
+        public string SliderURL { get; set; }
 
-        public string WtLoginSmsCountry { get; set; }
-
-        public string WtLoginSliderURL { get; set; }
-
-        public string WtLoginCaptchaResult { get; set; }
-
-        public byte[] TgtKey { get; set; }
-
-        public byte[] TgtToken { get; set; }
-
-        public byte[] D2Key { get; set; }
-
-        public byte[] D2Token { get; set; }
-
-        public byte[] GtKey { get; set; }
-
-        public byte[] StKey { get; set; }
-
-        public byte[] WtSessionTicketSig { get; set; }
-
-        public byte[] WtSessionTicketKey { get; set; }
-
-        public Info UinInfo { get; set; }
+        public string CaptchaResult { get; set; }
     }
 }

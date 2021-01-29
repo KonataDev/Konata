@@ -1,10 +1,8 @@
 ﻿using System;
 
-using Konata.Runtime.Base.Event;
-
 namespace Konata.Core.Event
 {
-    public class EventGroupMuteMember : KonataEventArgs
+    public class GroupMuteMemberEvent : BaseEvent
     {
         public uint GroupUin { get; set; }
 

@@ -16,7 +16,7 @@ namespace Konata.Core.Service.OnlinePush
             var protoRoot = new ProtoTreeRoot(ssoFrame.Payload.GetBytes());
             {
                 // Simplest way to read group message.
-                output = new EventGroupMessage
+                output = new GroupMessageEvent
                 {
                     GroupUin = (uint)protoRoot.GetLeafVar("0A.0A.4A.08", out var _),
                     GroupName = protoRoot.GetLeafString("0A.0A.4A.42", out var _),

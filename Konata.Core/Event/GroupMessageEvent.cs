@@ -1,10 +1,8 @@
 ﻿using System;
 
-using Konata.Runtime.Base.Event;
-
 namespace Konata.Core.Event
 {
-    public class EventGroupMessage : KonataEventArgs
+    public class GroupMessageEvent : BaseEvent
     {
         public string GroupName { get; set; }
 

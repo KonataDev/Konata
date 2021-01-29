@@ -19,7 +19,7 @@ namespace Konata.Core.Service.Friendlist
         {
             output = null;
 
-            if (eventArg is EventGroupModifyMemberCard e)
+            if (eventArg is GroupModifyMemberCardEvent e)
             {
                 var sigManager = e.Owner.GetComponent<UserSigManager>();
                 var ssoManager = e.Owner.GetComponent<SsoInfoManager>();

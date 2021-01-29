@@ -9,8 +9,8 @@ using Konata.Runtime.Base.Event;
 
 namespace Konata.Core.Service.OidbSvc
 {
-    [SSOService("OidbSvc.0x8a0_1", "Kick member in the group")]
-    class Oidb0x8a0_1 : ISSOService
+    [SSOService("OidbSvc.0x570_8", "Mute member in the group")]
+    public class Oidb0x570_8 : ISSOService
     {
         public bool HandleInComing(EventSsoFrame ssoMessage, out KonataEventArgs output)
         {
@@ -21,13 +21,13 @@ namespace Konata.Core.Service.OidbSvc
         {
             output = null;
 
-            if (eventArg is EventGroupKickMember e)
+            if (eventArg is GroupMuteMemberEvent e)
             {
                 var sigManager = e.Owner.GetComponent<UserSigManager>();
                 var ssoManager = e.Owner.GetComponent<SsoInfoManager>();
-                var oidbRequest = new OidbCmd0x8a0_1(e.GroupUin, e.MemberUin, e.ToggleType);
+                var oidbRequest = new OidbCmd0x570_8(e.GroupUin, e.MemberUin, e.TimeSeconds ?? uint.MaxValue);
 
-                if (EventSsoFrame.Create("OidbSvc.0x8a0_1", PacketType.TypeB,
+                if (EventSsoFrame.Create("OidbSvc.0x570_8", PacketType.TypeB,
                     ssoManager.NewSequence, ssoManager.Session, oidbRequest, out var ssoFrame))
                 {
                     if (EventServiceMessage.Create(ssoFrame, AuthFlag.D2Authentication,

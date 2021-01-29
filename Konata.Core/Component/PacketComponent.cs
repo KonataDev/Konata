@@ -1,14 +1,24 @@
 ﻿using System;
 using System.Text;
+using System.Reflection;
 using System.Threading;
+using System.Threading.Tasks;
+using System.Collections.Generic;
 using System.Collections.Concurrent;
 
-using Konata.Runtime.Base;
+using Konata.Core.Event;
+using Konata.Core.Entity;
+using Konata.Core.Service;
+using Konata.Core.Attribute;
 
 namespace Konata.Core.Manager
 {
-    public class SsoInfoManager : Component
+    [Component("PacketComponent", "Konata Packet Translation Component")]
+    public class PacketComponent : BaseComponent
     {
+        private Dictionary<string, ISSOService> _ssoServices;
+        private Dictionary<Type, ISSOService> _ssoServicesType;
+
         private int _globalSequence;
         private ConcurrentDictionary<string, int> _serviceSequence;
 
@@ -27,10 +37,32 @@ namespace Konata.Core.Manager
         /// </summary>
         public uint Session { get; set; }
 
-        public SsoInfoManager()
+        public PacketComponent()
         {
             _globalSequence = 10000;
             _serviceSequence = new ConcurrentDictionary<string, int>();
+
+            LoadSSOService();
+        }
+
+        /// <summary>
+        /// Load sso service
+        /// </summary>
+        private void LoadSSOService()
+        {
+            // Create sso services
+            foreach (var type in typeof(ISSOService).Assembly.GetTypes())
+            {
+                var attribute = (SSOServiceAttribute)type.GetCustomAttributes(typeof(SSOServiceAttribute));
+                if (attribute != null && typeof(SSOServiceAttribute).IsAssignableFrom(type))
+                {
+                    var service = (ISSOService)Activator.CreateInstance(type);
+                    {
+                        _ssoServices.Add(attribute.ServiceName, service);
+                        _ssoServicesType.Add(type, service);
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -74,5 +106,25 @@ namespace Konata.Core.Manager
         /// <returns></returns>
         public bool DestroyServiceSequence(string service)
             => _serviceSequence.TryRemove(service, out var _) || true;
+
+        /// <summary>
+        /// Get SSO service
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        private T GetSSOService<T>()
+            where T : ISSOService
+        {
+            if (!_ssoServicesType.TryGetValue(typeof(T), out var service))
+            {
+                return default;
+            }
+            return (T)service;
+        }
+
+        public override void EventHandler(KonataTask task)
+        {
+
+        }
     }
 }

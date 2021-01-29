@@ -1,10 +1,8 @@
 ﻿using System;
 
-using Konata.Runtime.Base.Event;
-
 namespace Konata.Core.Event
 {
-    public class EventGroupSpecialTitle : KonataEventArgs
+    public class GroupSpecialTitleEvent : BaseEvent
     {
         public uint GroupUin { get; set; }
 

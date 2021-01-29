@@ -9,8 +9,8 @@ using Konata.Runtime.Base.Event;
 
 namespace Konata.Core.Service.OidbSvc
 {
-    [SSOService("OidbSvc.0x8fc_2", "Set special title for member")]
-    public class Oidb0x8fc_2 : ISSOService
+    [SSOService("OidbSvc.0x55c_1", "Promote admin for member")]
+    public class Oidb0x55c_1 : ISSOService
     {
         public bool HandleInComing(EventSsoFrame ssoMessage, out KonataEventArgs output)
         {
@@ -21,14 +21,13 @@ namespace Konata.Core.Service.OidbSvc
         {
             output = null;
 
-            if (eventArg is EventGroupSpecialTitle e)
+            if (eventArg is GroupPromoteAdminEvent e)
             {
                 var sigManager = e.Owner.GetComponent<UserSigManager>();
                 var ssoManager = e.Owner.GetComponent<SsoInfoManager>();
-                var oidbRequest = new OidbCmd0x8fc_2(e.GroupUin, e.MemberUin, e.SpecialTitle,
-                    e.TimeSeconds ?? uint.MaxValue);
+                var oidbRequest = new OidbCmd0x55c_1(e.GroupUin, e.MemberUin, e.ToggleType);
 
-                if (EventSsoFrame.Create("OidbSvc.0x8fc_2", PacketType.TypeB,
+                if (EventSsoFrame.Create("OidbSvc.0x55c_1", PacketType.TypeB,
                     ssoManager.NewSequence, ssoManager.Session, oidbRequest, out var ssoFrame))
                 {
                     if (EventServiceMessage.Create(ssoFrame, AuthFlag.D2Authentication,

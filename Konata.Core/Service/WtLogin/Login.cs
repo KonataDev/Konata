@@ -68,11 +68,11 @@ namespace Konata.Core.Service.WtLogin
                 var sigSession = ((T104Body)tlv104._tlvBody)._sigSession;
                 var sigCaptchaURL = ((T192Body)tlv192._tlvBody)._url;
 
-                return new EventWtLogin
+                return new WtLoginEvent
                 {
                     WtLoginSession = sigSession,
-                    WtLoginSliderURL = sigCaptchaURL,
-                    EventType = EventWtLogin.Type.CheckSlider
+                    SliderURL = sigCaptchaURL,
+                    EventType = WtLoginEvent.Type.CheckSlider
                 };
             }
 
@@ -109,14 +109,14 @@ namespace Konata.Core.Service.WtLogin
                     var smsCountryCode = ((T178Body)tlv178._tlvBody)._countryCode;
                     var smsToken = ((T174Body)tlv174._tlvBody)._smsToken;
 
-                    return new EventWtLogin
+                    return new WtLoginEvent
                     {
                         WtLoginSession = sigSession,
-                        WtLoginSmsPhone = smsPhone,
+                        SmsPhone = smsPhone,
                         WtLoginSmsToken = smsToken,
-                        WtLoginSmsCountry = smsCountryCode,
+                        SmsCountry = smsCountryCode,
 
-                        EventType = EventWtLogin.Type.RefreshSMS,
+                        EventType = WtLoginEvent.Type.RefreshSMS,
                         EventMessage = sigMessage
                     };
                 }
@@ -130,10 +130,10 @@ namespace Konata.Core.Service.WtLogin
                 {
                     var sigSession = ((T104Body)tlv104._tlvBody)._sigSession;
 
-                    return new EventWtLogin
+                    return new WtLoginEvent
                     {
                         WtLoginSession = sigSession,
-                        EventType = EventWtLogin.Type.CheckSMS
+                        EventType = WtLoginEvent.Type.CheckSMS
                     };
                 }
             }
@@ -145,9 +145,9 @@ namespace Konata.Core.Service.WtLogin
         {
             // <TODO> Image captcha
 
-            return new EventWtLogin
+            return new WtLoginEvent
             {
-                EventType = EventWtLogin.Type.NotImplemented,
+                EventType = WtLoginEvent.Type.NotImplemented,
                 EventMessage = "Image captcha not implemented."
             };
         }
@@ -156,9 +156,9 @@ namespace Konata.Core.Service.WtLogin
         {
             // <TODO> Device lock
 
-            return new EventWtLogin
+            return new WtLoginEvent
             {
-                EventType = EventWtLogin.Type.NotImplemented,
+                EventType = WtLoginEvent.Type.NotImplemented,
                 EventMessage = "DeviceLock not implemented. Please turn off your device lock and try again."
             };
         }
@@ -237,7 +237,7 @@ namespace Konata.Core.Service.WtLogin
                     Console.WriteLine($"d2Key => {Hex.Bytes2HexStr(d2Key)}");
                     Console.WriteLine($"d2Token => {Hex.Bytes2HexStr(d2Token)}");
 
-                    return new EventWtLogin
+                    return new WtLoginEvent
                     {
                         TgtKey = tgtKey,
                         TgtToken = tgtToken,
@@ -251,14 +251,14 @@ namespace Konata.Core.Service.WtLogin
                         WtSessionTicketSig = wtSessionTicketSig,
                         WtSessionTicketKey = wtSessionTicketKey,
 
-                        UinInfo = new EventWtLogin.Info
+                        UinInfo = new WtLoginEvent.Info
                         {
                             Age = userAge,
                             Face = userFace,
                             Name = userNickname
                         },
 
-                        EventType = EventWtLogin.Type.OK
+                        EventType = WtLoginEvent.Type.OK
                     };
                 }
             }
@@ -268,18 +268,18 @@ namespace Konata.Core.Service.WtLogin
 
         private KonataEventArgs OnRecvInvalidUsrPwd(OicqRequest request)
         {
-            return new EventWtLogin
+            return new WtLoginEvent
             {
-                EventType = EventWtLogin.Type.InvalidUinOrPassword,
+                EventType = WtLoginEvent.Type.InvalidUinOrPassword,
                 EventMessage = "Incorrect account or password."
             };
         }
 
         private KonataEventArgs OnRecvInvalidSmsCode(OicqRequest request)
         {
-            return new EventWtLogin
+            return new WtLoginEvent
             {
-                EventType = EventWtLogin.Type.InvalidSmsCode,
+                EventType = WtLoginEvent.Type.InvalidSmsCode,
                 EventMessage = "Incorrect sms code."
             };
         }
@@ -295,9 +295,9 @@ namespace Konata.Core.Service.WtLogin
                 var errorTitle = ((T146Body)tlv146._tlvBody)._title;
                 var errorMessage = ((T146Body)tlv146._tlvBody)._message;
 
-                return new EventWtLogin
+                return new WtLoginEvent
                 {
-                    EventType = EventWtLogin.Type.InvalidLoginEnvironment,
+                    EventType = WtLoginEvent.Type.InvalidLoginEnvironment,
                     EventMessage = $"{errorTitle} {errorMessage}"
                 };
             }
@@ -316,9 +316,9 @@ namespace Konata.Core.Service.WtLogin
                 var errorTitle = ((T146Body)tlv146._tlvBody)._title;
                 var errorMessage = ((T146Body)tlv146._tlvBody)._message;
 
-                return new EventWtLogin
+                return new WtLoginEvent
                 {
-                    EventType = EventWtLogin.Type.LoginDenied,
+                    EventType = WtLoginEvent.Type.LoginDenied,
                     EventMessage = $"{errorTitle} {errorMessage}"
                 };
             }
@@ -328,9 +328,9 @@ namespace Konata.Core.Service.WtLogin
 
         private KonataEventArgs OnRecvUnknown()
         {
-            return new EventWtLogin
+            return new WtLoginEvent
             {
-                EventType = EventWtLogin.Type.Unknown,
+                EventType = WtLoginEvent.Type.Unknown,
                 EventMessage = "Unknown OicqRequest received."
             };
         }
@@ -341,11 +341,11 @@ namespace Konata.Core.Service.WtLogin
         {
             output = null;
 
-            if (eventArg is EventWtLogin e)
+            if (eventArg is WtLoginEvent e)
             {
                 var sigManager = e.Owner.GetComponent<UserSigManager>();
                 var ssoManager = e.Owner.GetComponent<SsoInfoManager>();
-                var configManager = e.Owner.GetComponent<ConfigManager>();
+                var configManager = e.Owner.GetComponent<ConfigComponent>();
 
                 OicqRequest oicqRequest;
                 var oicqKeyRing = new OicqKeyRing
@@ -361,24 +361,24 @@ namespace Konata.Core.Service.WtLogin
                 // Build OicqRequest
                 switch (e.EventType)
                 {
-                    case EventWtLogin.Type.Tgtgt:
+                    case WtLoginEvent.Type.Tgtgt:
                         oicqRequest = BuildRequestTgtgt(sigManager.Uin, ssoManager.NewSequence,
                             oicqKeyRing, configManager);
                         break;
 
-                    case EventWtLogin.Type.CheckSMS:
+                    case WtLoginEvent.Type.CheckSMS:
                         oicqRequest = BuildRequestCheckSms(sigManager.Uin, sigManager.WtLoginSession,
-                            sigManager.WtLoginSmsToken, e.WtLoginCaptchaResult, sigManager.GSecret, oicqKeyRing);
+                            sigManager.WtLoginSmsToken, e.CaptchaResult, sigManager.GSecret, oicqKeyRing);
                         break;
 
-                    case EventWtLogin.Type.RefreshSMS:
+                    case WtLoginEvent.Type.RefreshSMS:
                         oicqRequest = BuildRequestRefreshSms(sigManager.Uin, sigManager.WtLoginSession,
                            sigManager.WtLoginSmsToken, oicqKeyRing);
                         break;
 
-                    case EventWtLogin.Type.CheckSlider:
+                    case WtLoginEvent.Type.CheckSlider:
                         oicqRequest = BuildRequestCheckSlider(sigManager.Uin,
-                            sigManager.WtLoginSession, e.WtLoginCaptchaResult, oicqKeyRing);
+                            sigManager.WtLoginSession, e.CaptchaResult, oicqKeyRing);
                         break;
 
                     default:
@@ -403,7 +403,7 @@ namespace Konata.Core.Service.WtLogin
         #region Event Builders
 
         private OicqRequest BuildRequestTgtgt(uint uin, int ssoSequence,
-            OicqKeyRing keyRing, ConfigManager configInfo)
+            OicqKeyRing keyRing, ConfigComponent configInfo)
             => new OicqRequestTgtgt(uin, ssoSequence, keyRing);
 
         private OicqRequest BuildRequestCheckSms(uint uin, string session,

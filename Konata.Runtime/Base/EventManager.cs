@@ -176,17 +176,17 @@ namespace Konata.Runtime
         /// <param name="arg"></param>
         public async void SendEventToEntity(Entity entity,KonataEventArgs arg)
         {
-            coreEventLock.EnterReadLock();
+            _coreEventLock.EnterReadLock();
             try
             {
-                if (bindComponentList.TryGetValue(entity.Id, out var component))
+                if (_bindComponentList.TryGetValue(entity.Id, out var component))
                 {
                     await component.GetPipe().SendAsync(arg);
                 }
             }
             finally
             {
-                coreEventLock.ExitReadLock();
+                _coreEventLock.ExitReadLock();
             }
         }
 

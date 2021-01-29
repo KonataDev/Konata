@@ -1,10 +1,9 @@
 ﻿using System;
 
-using Konata.Runtime.Base.Event;
 
 namespace Konata.Core.Event
 {
-    public class EventGroupPromoteAdmin : KonataEventArgs
+    public class GroupKickMemberEvent : BaseEvent
     {
         /// <summary>
         /// <b>[In]</b> <br/>
@@ -19,8 +18,9 @@ namespace Konata.Core.Event
         public uint MemberUin { get; set; }
 
         /// <summary>
-        /// <b>[In]</b> <br/>
-        ///  Flag to toggle set or unset. <br/>
+        /// <b>[Opt] [In]</b> <br/>
+        ///  Flag to prevent member request or no. <br/>
+        ///  The default value is <b>false</b>
         /// </summary>
         public bool ToggleType { get; set; }
     }
