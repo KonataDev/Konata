@@ -1,10 +1,8 @@
 ﻿using System;
 
-using Konata.Runtime.Base.Event;
-
 namespace Konata.Core.Event
 {
-    public class EventAccountPullTroopList : KonataEventArgs
+    public class PullTroopListEvent : ProtocolEvent
     {
         /// <summary>
         /// <b>[In]</b>          <br/>

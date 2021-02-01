@@ -1,4 +1,5 @@
 ﻿using System;
+using Konata.Core.Service;
 using Konata.Core.Packet.Tlv;
 using Konata.Core.Packet.Tlv.TlvModel;
 
@@ -11,11 +12,11 @@ namespace Konata.Core.Packet.Oicq
         private const ushort OicqCommand = 0x0810;
         private const ushort OicqSubCommand = 0x0002;
 
-        public OicqRequestCheckImage(uint uin, string session, string ticket, OicqKeyRing keyRing)
+        public OicqRequestCheckImage(string ticket, SignInfo signinfo)
 
-            : base(OicqCommand, OicqSubCommand, uin,
-                  OicqEncryptMethod.ECDH7, new XCaptcha(session, ticket),
-                  keyRing.shareKey, keyRing.randKey, keyRing.defaultPublicKey)
+            : base(OicqCommand, OicqSubCommand, signinfo.UinInfo.Uin,
+                  OicqEncryptMethod.ECDH7, new XCaptcha(signinfo.WtLoginSession, ticket),
+                  signinfo.ShareKey, signinfo.RandKey, signinfo.DefaultPublicKey)
         {
 
         }

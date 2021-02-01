@@ -2,7 +2,7 @@
 
 namespace Konata.Core.Event
 {
-    public class GroupMessageEvent : BaseEvent
+    public class GroupMessageEvent : ProtocolEvent
     {
         public string GroupName { get; set; }
 

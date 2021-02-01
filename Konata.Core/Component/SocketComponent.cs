@@ -2,8 +2,6 @@
 using System.Net.Sockets;
 using System.Net.NetworkInformation;
 
-using Konata.Core.Attribute;
-
 namespace Konata.Core.Manager
 {
     [Component("SocketComponent", "Konata Socket Client Component")]

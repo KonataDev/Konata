@@ -2,6 +2,7 @@
 using System.Text;
 using System.Threading.Tasks.Dataflow;
 
+using Konata.Core.Utils;
 using Konata.Core.Event;
 using Konata.Core.Manager;
 
@@ -19,12 +20,15 @@ namespace Konata.Core
         {
             var entity = new Bot();
             {
+                foreach (var type in Reflection.GetClassesByAttribute<ComponentAttribute>())
+                {
+                    entity.AddComponent((BaseComponent)Activator.CreateInstance(type));
+                }
+
                 entity.SetEventHandler(handler);
-                entity.AddComponent(new PacketComponent());
-                entity.AddComponent(new SocketComponent());
-                entity.AddComponent(new BusinessComponent());
-                entity.AddComponent(new ConfigComponent(config));
+                entity.GetComponent<ConfigComponent>().LoadConfig(config);
             }
+
             return entity;
         }
 

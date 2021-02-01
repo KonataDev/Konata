@@ -1,7 +1,5 @@
 ﻿using System;
 
-using Konata.Runtime.Base;
-
 namespace Konata.Core
 {
     internal class Default

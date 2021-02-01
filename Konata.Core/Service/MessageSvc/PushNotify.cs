@@ -1,21 +1,20 @@
 ﻿using System;
-using System.Text;
 
 using Konata.Core.Packet;
 using Konata.Core.Event;
-using Konata.Runtime.Base.Event;
 
 namespace Konata.Core.Service.MessageSvc
 {
     [SSOService("MessageSvc.PushNotify", "Push notify on received a private message")]
     public class PushNotify : ISSOService
     {
-        public bool HandleInComing(EventSsoFrame ssoMessage, out KonataEventArgs output)
+        public bool Parse(SSOFrame input, SignInfo signInfo, out ProtocolEvent output)
         {
             throw new NotImplementedException();
         }
 
-        public bool HandleOutGoing(KonataEventArgs original, out byte[] message)
+        public bool Build(Sequence sequence, ProtocolEvent input, SignInfo signInfo,
+            out int newSequence, out byte[] output)
         {
             throw new NotImplementedException();
         }

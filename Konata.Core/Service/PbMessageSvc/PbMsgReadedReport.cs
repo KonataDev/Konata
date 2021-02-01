@@ -1,21 +1,20 @@
 ﻿using System;
-using System.Text;
 
-using Konata.Core.Packet;
 using Konata.Core.Event;
-using Konata.Runtime.Base.Event;
+using Konata.Core.Packet;
 
 namespace Konata.Core.Service.PbMessageSvc
 {
-    [SSOService("PbMessageSvc.PbMsgReadedReport", "Push have been read message")]
+    [SSOService("PbMessageSvc.PbMsgReadedReport", "Push read signal")]
     public class PbMsgReadReport : ISSOService
     {
-        public bool HandleInComing(EventSsoFrame ssoMessage, out KonataEventArgs output)
+        public bool Parse(SSOFrame input, SignInfo signInfo, out ProtocolEvent output)
         {
             throw new NotImplementedException();
         }
 
-        public bool HandleOutGoing(KonataEventArgs original, out byte[] message)
+        public bool Build(Sequence sequence, ProtocolEvent input, SignInfo signInfo,
+            out int newSequence, out byte[] output)
         {
             throw new NotImplementedException();
         }

@@ -1,4 +1,5 @@
 ﻿using System;
+using Konata.Core.Service;
 using Konata.Core.Packet.Tlv;
 using Konata.Core.Packet.Tlv.TlvModel;
 
@@ -11,10 +12,10 @@ namespace Konata.Core.Packet.Oicq
         private const ushort OicqCommand = 0x0810;
         private const ushort OicqSubCommand = 0x0008;
 
-        public OicqRequestRefreshSms(uint uin, string session, string smsToken, OicqKeyRing keyRing)
-            : base(OicqCommand, OicqSubCommand, uin, OicqEncryptMethod.ECDH7,
-                  new XRefreshSms(session, smsToken),
-                  keyRing.shareKey, keyRing.randKey, keyRing.defaultPublicKey)
+        public OicqRequestRefreshSms(SignInfo signinfo)
+            : base(OicqCommand, OicqSubCommand, signinfo.UinInfo.Uin, OicqEncryptMethod.ECDH7,
+                  new XRefreshSms(signinfo.WtLoginSession, signinfo.WtLoginSmsToken),
+                  signinfo.ShareKey, signinfo.RandKey, signinfo.DefaultPublicKey)
         {
 
         }

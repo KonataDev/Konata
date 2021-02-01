@@ -2,7 +2,7 @@
 
 namespace Konata.Core.Event
 {
-    public class GroupSpecialTitleEvent : BaseEvent
+    public class GroupSpecialTitleEvent : ProtocolEvent
     {
         public uint GroupUin { get; set; }
 

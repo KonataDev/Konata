@@ -2,7 +2,7 @@
 
 namespace Konata.Core.Event
 {
-    public class GroupModifyMemberCardEvent : BaseEvent
+    public class GroupModifyMemberCardEvent : ProtocolEvent
     {
         /// <summary>
         /// <b>[In]</b>          <br/>

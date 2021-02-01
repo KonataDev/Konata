@@ -2,7 +2,7 @@
 
 namespace Konata.Core.Event
 {
-    public class GroupMuteMemberEvent : BaseEvent
+    public class GroupMuteMemberEvent : ProtocolEvent
     {
         public uint GroupUin { get; set; }
 

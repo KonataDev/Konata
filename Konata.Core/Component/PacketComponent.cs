@@ -1,130 +1,148 @@
 ﻿using System;
-using System.Text;
 using System.Reflection;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
 
+using Konata.Core.Utils;
 using Konata.Core.Event;
 using Konata.Core.Entity;
 using Konata.Core.Service;
-using Konata.Core.Attribute;
+using Konata.Core.Packet;
 
 namespace Konata.Core.Manager
 {
     [Component("PacketComponent", "Konata Packet Translation Component")]
     public class PacketComponent : BaseComponent
     {
-        private Dictionary<string, ISSOService> _ssoServices;
-        private Dictionary<Type, ISSOService> _ssoServicesType;
+        private const string TAG = "PacketComponent";
 
-        private int _globalSequence;
-        private ConcurrentDictionary<string, int> _serviceSequence;
+        private Dictionary<string, ISSOService> _services;
+        private Dictionary<Type, ISSOService> _servicesType;
+        private Dictionary<Type, List<ISSOService>> _servicesEventType;
 
-        /// <summary>
-        /// Get sequence with auto increment
-        /// </summary>
-        public int NewSequence { get => GetNewSequence(); }
+        private ConcurrentDictionary<int, TaskCompletionSource<BaseEvent>> _pendingRequests;
 
-        /// <summary>
-        /// Get/Set current sequence
-        /// </summary>
-        public int CurrentSequence { get => _globalSequence; }
-
-        /// <summary>
-        /// Get Session
-        /// </summary>
-        public uint Session { get; set; }
+        private Sequence _serviceSequence;
 
         public PacketComponent()
         {
-            _globalSequence = 10000;
-            _serviceSequence = new ConcurrentDictionary<string, int>();
+            _serviceSequence = new Sequence();
+            _services = new Dictionary<string, ISSOService>();
+            _servicesType = new Dictionary<Type, ISSOService>();
+            _servicesEventType = new Dictionary<Type, List<ISSOService>>();
+            _pendingRequests = new ConcurrentDictionary<int, TaskCompletionSource<BaseEvent>>();
 
-            LoadSSOService();
+            LoadService();
         }
 
         /// <summary>
         /// Load sso service
         /// </summary>
-        private void LoadSSOService()
+        private void LoadService()
         {
-            // Create sso services
-            foreach (var type in typeof(ISSOService).Assembly.GetTypes())
+            // Initialize protocol event types
+            foreach (var type in Reflection.GetChildClasses<ProtocolEvent>())
             {
-                var attribute = (SSOServiceAttribute)type.GetCustomAttributes(typeof(SSOServiceAttribute));
-                if (attribute != null && typeof(SSOServiceAttribute).IsAssignableFrom(type))
+                _servicesEventType.Add(type, new List<ISSOService>());
+            }
+
+            // Create sso services
+            foreach (var type in Reflection.GetClassesByAttribute<SSOServiceAttribute>())
+            {
+                var eventAttrs = type.GetCustomAttributes<EventAttribute>();
+                var serviceAttr = type.GetCustomAttribute<SSOServiceAttribute>();
+
+                if (serviceAttr != null)
                 {
                     var service = (ISSOService)Activator.CreateInstance(type);
+
+                    // Bind service name with service
+                    _services.Add(serviceAttr.ServiceName, service);
+                    _servicesType.Add(type, service);
+
+                    // Bind protocol event type with service
+                    foreach (var attr in eventAttrs)
                     {
-                        _ssoServices.Add(attribute.ServiceName, service);
-                        _ssoServicesType.Add(type, service);
+                        _servicesEventType[attr.GetType()].Add(service);
                     }
                 }
             }
         }
 
-        /// <summary>
-        /// Get sequence with auto increment
-        /// </summary>
-        /// <returns></returns>
-        public int GetNewSequence()
-        {
-            Interlocked.CompareExchange(ref _globalSequence, 10000, int.MaxValue);
-            return Interlocked.Add(ref _globalSequence, 1);
-        }
-
-        /// <summary>
-        /// Get sequence by service name
-        /// </summary>
-        /// <param name="service"></param>
-        /// <returns></returns>
-        public int GetServiceSequence(string service)
-        {
-            // Get service sequence by name
-            if (_serviceSequence.TryGetValue(service, out var sequence))
-            {
-                return sequence;
-            }
-
-            sequence = GetNewSequence();
-
-            // Record this sequence
-            if (_serviceSequence.TryAdd(service, sequence))
-            {
-                return sequence;
-            }
-
-            throw new Exception("Get service sequence failed.");
-        }
-
-        /// <summary>
-        /// Destroy sequence by service name
-        /// </summary>
-        /// <param name="service"></param>
-        /// <returns></returns>
-        public bool DestroyServiceSequence(string service)
-            => _serviceSequence.TryRemove(service, out var _) || true;
-
-        /// <summary>
-        /// Get SSO service
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        private T GetSSOService<T>()
-            where T : ISSOService
-        {
-            if (!_ssoServicesType.TryGetValue(typeof(T), out var service))
-            {
-                return default;
-            }
-            return (T)service;
-        }
-
         public override void EventHandler(KonataTask task)
         {
+            var config = GetComponent<ConfigComponent>();
 
+            if (task.EventPayload is PacketEvent packetEvent)
+            {
+                // Parse service message
+                if (ServiceMessage.Parse(packetEvent.Buffer, config.SignInfo, out var serviceMsg))
+                {
+                    // Parse SSO frame
+                    if (SSOFrame.Parse(serviceMsg, out var ssoFrame))
+                    {
+                        // Get SSO service by sso command
+                        if (_services.TryGetValue(ssoFrame.Command, out var service))
+                        {
+                            // Translate bytes to ProtocolEvent 
+                            if (service.Parse(ssoFrame, config.SignInfo, out var outEvent))
+                            {
+                                // Get pending request
+                                if (_pendingRequests.TryRemove(ssoFrame.Sequence, out var request))
+                                {
+                                    request.SetResult(outEvent);
+                                }
+                                else
+                                {
+                                    PostEvent<BusinessComponent>(outEvent);
+                                }
+                            }
+                            else LogW(TAG, $"This sso frame cannot be processed. { ssoFrame.Command } { ssoFrame.Payload }");
+                        }
+                        else LogW(TAG, $"Unsupported sso frame received. { ssoFrame.Command } { ssoFrame.Payload }");
+                    }
+                    else LogW(TAG, $"Parse sso frame failed. { ssoFrame.Command } { ssoFrame.Payload }");
+                }
+                else LogW(TAG, $"Parse service message failed. \n D2 => { config.SignInfo.D2Key }\n Buffer => { packetEvent.Buffer }");
+            }
+
+            // Protocol Event
+            else if (task.EventPayload is ProtocolEvent protocolEvent)
+            {
+                if (!_servicesEventType.TryGetValue(protocolEvent.GetType(), out var serviceList))
+                {
+                    task.CompletionSource.SetResult(null);
+                    return;
+                }
+
+                foreach (var service in serviceList)
+                {
+                    if (service.Build(_serviceSequence, protocolEvent, config.SignInfo, out var sequence, out var buffer))
+                    {
+                        PostEvent<SocketComponent>(new PacketEvent
+                        {
+                            Buffer = buffer,
+                            EventType = PacketEvent.Type.Send
+                        });
+
+                    AddPending:
+                        if (!_pendingRequests.TryAdd(sequence, task.CompletionSource))
+                        {
+                            _pendingRequests[sequence].SetCanceled();
+                            _pendingRequests.TryRemove(sequence, out _);
+
+                            goto AddPending;
+                        }
+                    }
+                }
+            }
+
+            // Unsupported event
+            else
+            {
+                LogW(TAG, "Unsupported Event received?");
+            }
         }
     }
 }

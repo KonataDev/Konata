@@ -15,6 +15,9 @@ namespace Konata.Core.Manager
 
         public virtual void EventHandler(KonataTask task) { }
 
+        protected void PostEventToEntity(BaseEvent anyEvent)
+            => Entity.PostEventToEntity(anyEvent);
+
         protected Task<BaseEvent> PostEvent<T>(BaseEvent anyEvent)
             where T : BaseComponent => Entity.PostEvent<T>(anyEvent);
 
@@ -27,10 +30,10 @@ namespace Konata.Core.Manager
         #region Log Methods
 
         protected void Log(LogLevel logLevel, string tag, string content)
-            => Entity.PostEntityEvent(new LogEvent
+            => PostEventToEntity(new LogEvent
             {
-                logLevel = logLevel,
-                eventMessage = $"{tag} {content}"
+                Level = logLevel,
+                EventMessage = $"{tag} {content}"
             });
 
         protected void LogV(string tag, string content)

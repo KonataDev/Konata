@@ -1,16 +1,15 @@
 ﻿using System;
-using System.Text;
 
-namespace Konata.Core.Attribute
+namespace Konata
 {
     /// <summary>
     /// Konata Component Attribute
     /// </summary>
-    public class ComponentAttribute : System.Attribute
+    public class ComponentAttribute : Attribute
     {
-        public string ComponentName { get; set; } = "";
+        public string ComponentName { get; set; }
 
-        public string Description { get; set; } = "";
+        public string Description { get; set; }
 
         public ComponentAttribute(string name, string description)
         {

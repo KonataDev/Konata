@@ -1,19 +1,17 @@
 ﻿using System;
-using System.Text;
 
 using Konata.Core.Event;
 using Konata.Core.Packet;
 using Konata.Utils.Protobuf;
-using Konata.Runtime.Base.Event;
 
 namespace Konata.Core.Service.OnlinePush
 {
     [SSOService("OnlinePush.PbPushGroupMsg", "Receive group message from server")]
     public class PbPushGroupMsg : ISSOService
     {
-        public bool HandleInComing(EventSsoFrame ssoFrame, out KonataEventArgs output)
+        public bool Parse(SSOFrame input, SignInfo signInfo, out ProtocolEvent output)
         {
-            var protoRoot = new ProtoTreeRoot(ssoFrame.Payload.GetBytes());
+            var protoRoot = new ProtoTreeRoot(input.Payload.GetBytes());
             {
                 // Simplest way to read group message.
                 output = new GroupMessageEvent
@@ -31,7 +29,7 @@ namespace Konata.Core.Service.OnlinePush
             return true;
         }
 
-        public bool HandleOutGoing(KonataEventArgs eventArg, out byte[] output)
-            => (output = null) == null;
+        public bool Build(Sequence sequence, ProtocolEvent input, SignInfo signInfo,
+            out int newSequence, out byte[] output) => throw new NotImplementedException();
     }
 }

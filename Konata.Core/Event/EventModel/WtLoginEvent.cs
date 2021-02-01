@@ -1,10 +1,8 @@
 ﻿using System;
 
-using Konata.Runtime.Base.Event;
-
 namespace Konata.Core.Event
 {
-    public class WtLoginEvent : BaseEvent
+    public class WtLoginEvent : ProtocolEvent
     {
         public enum Type
         {

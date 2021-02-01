@@ -2,10 +2,8 @@
 using System.Collections.Generic;
 
 using Konata.Utils.IO;
-using Konata.Core.Packet;
-using Konata.Runtime.Base.Event;
 
-namespace Konata.Core.Event
+namespace Konata.Core.Packet
 {
     public enum PacketType : uint
     {
@@ -13,7 +11,7 @@ namespace Konata.Core.Event
         TypeB = 0x0B
     }
 
-    public class EventSsoFrame : KonataEventArgs
+    public class SSOFrame
     {
         private uint _session;
         private int _sequence;
@@ -35,9 +33,10 @@ namespace Konata.Core.Event
         public PacketType PacketType { get => _packetType; }
 
         public bool IsServerResponse { get; private set; }
-        public static bool Parse(EventServiceMessage fromService, out EventSsoFrame output)
+
+        public static bool Parse(ServiceMessage fromService, out SSOFrame output)
         {
-            output = new EventSsoFrame
+            output = new SSOFrame
             {
                 _packetType = fromService.MessagePktType
             };
@@ -86,14 +85,13 @@ namespace Konata.Core.Event
                 }
             }
 
-            output.Owner = fromService.Owner;
             //TODO:
             //IsServerResponse?
             //output.IsServerResponse = true;
             return true;
         }
 
-        public static ByteBuffer Build(EventSsoFrame ssoFrame)
+        public static ByteBuffer Build(SSOFrame ssoFrame)
         {
             byte[] unknownBytes0 = { };
             byte[] unknownBytes1 = { };
@@ -154,9 +152,9 @@ namespace Konata.Core.Event
         }
 
         public static bool Create(string command, PacketType pktType, int sequence,
-            byte[] tgtoken, uint session, ByteBuffer payload, out EventSsoFrame ssoFrame)
+            byte[] tgtoken, uint session, ByteBuffer payload, out SSOFrame ssoFrame)
         {
-            ssoFrame = new EventSsoFrame
+            ssoFrame = new SSOFrame
             {
                 _command = command,
                 _sequence = sequence,
@@ -170,7 +168,7 @@ namespace Konata.Core.Event
         }
 
         public static bool Create(string command, PacketType pktType, int sequence,
-            uint session, ByteBuffer payload, out EventSsoFrame ssoFrame)
+            uint session, ByteBuffer payload, out SSOFrame ssoFrame)
           => Create(command, pktType, sequence, null, session, payload, out ssoFrame);
     }
 }

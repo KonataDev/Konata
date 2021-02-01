@@ -1,13 +1,10 @@
 ﻿using System;
 
-using Konata.Core.Packet;
-using Konata.Core.Manager;
-using Konata.Runtime.Network;
-using Konata.Runtime.Base.Event;
 using Konata.Utils.IO;
 using Konata.Utils.Crypto;
+using Konata.Core.Service;
 
-namespace Konata.Core.Event
+namespace Konata.Core.Packet
 {
     public enum AuthFlag : byte
     {
@@ -16,7 +13,7 @@ namespace Konata.Core.Event
         WtLoginExchange = 0x02,
     }
 
-    public class EventServiceMessage : KonataEventArgs
+    public class ServiceMessage
     {
         private string _headUin;
         private byte[] _headExtra;
@@ -26,11 +23,11 @@ namespace Konata.Core.Event
         private AuthFlag _authFlag;
         private PacketType _packetType;
         private byte[] _payloadData;
-        private EventSsoFrame _payloadFrame;
+        private SSOFrame _payloadFrame;
 
         public string HeadUin { get => _headUin; }
 
-        public EventSsoFrame Frame { get => _payloadFrame; }
+        public SSOFrame Frame { get => _payloadFrame; }
 
         public byte[] FrameBytes { get => _payloadData; }
 
@@ -41,7 +38,7 @@ namespace Konata.Core.Event
         public bool IsServerResponse { get; private set; } = false;
 
 
-        public static bool Build(EventServiceMessage toService, out byte[] output)
+        public static bool Build(ServiceMessage toService, out byte[] output)
         {
             var write = new PacketBase();
             {
@@ -58,9 +55,9 @@ namespace Konata.Core.Event
                     ByteBuffer.Prefix.Uint32 | ByteBuffer.Prefix.WithPrefix);
 
                 if (toService._keyData == null)
-                    write.PutByteBuffer(EventSsoFrame.Build(toService._payloadFrame));
+                    write.PutByteBuffer(SSOFrame.Build(toService._payloadFrame));
                 else
-                    write.PutEncryptedBytes(EventSsoFrame.Build(toService._payloadFrame).GetBytes(),
+                    write.PutEncryptedBytes(SSOFrame.Build(toService._payloadFrame).GetBytes(),
                     TeaCryptor.Instance, toService._keyData);
             }
 
@@ -68,12 +65,14 @@ namespace Konata.Core.Event
             return true;
         }
 
-        public static bool Parse(SocketPackage package, out EventServiceMessage output)
-        {
-            var sigInfo = package.Owner.GetComponent<UserSigManager>();
-            output = new EventServiceMessage();
+        public static bool Parse(byte[] buffer, SignInfo signinfo, out ServiceMessage output)
+            => Parse(buffer, signinfo.D2Key, signinfo.ZeroKey, out output);
 
-            var read = new PacketBase(package.Data);
+        public static bool Parse(byte[] buffer, byte[] d2Key, byte[] zeroKey, out ServiceMessage output)
+        {
+            output = new ServiceMessage();
+
+            var read = new PacketBase(buffer);
             {
                 read.TakeUintBE(out var pktType);
                 {
@@ -106,13 +105,13 @@ namespace Konata.Core.Event
                     read.TakeAllBytes(out output._payloadData);
                     break;
                 case AuthFlag.D2Authentication:
-                    read.TakeDecryptedBytes(out output._payloadData, TeaCryptor.Instance, sigInfo.D2Key);
+                    read.TakeDecryptedBytes(out output._payloadData, TeaCryptor.Instance, d2Key);
                     break;
                 case AuthFlag.WtLoginExchange:
-                    read.TakeDecryptedBytes(out output._payloadData, TeaCryptor.Instance, sigInfo.ZeroKey);
+                    read.TakeDecryptedBytes(out output._payloadData, TeaCryptor.Instance, zeroKey);
                     break;
             }
-            output.Owner = package.Owner;
+
             //TODO:
             //IsServerResponse?
             //output.IsServerResponse = true;
@@ -120,8 +119,16 @@ namespace Konata.Core.Event
             return true;
         }
 
-        public static bool Create(EventSsoFrame ssoFrame, AuthFlag reqFlag, uint reqUin,
-            byte[] d2Token, byte[] d2Key, out EventServiceMessage output)
+        public static bool Create(SSOFrame ssoFrame, AuthFlag reqFlag, uint reqUin,
+            SignInfo signinfo, out ServiceMessage output)
+            => Create(ssoFrame, reqFlag, reqUin, signinfo.D2Token, signinfo.D2Key, out output);
+
+        public static bool Create(SSOFrame ssoFrame, AuthFlag reqFlag,
+            uint reqUin, out ServiceMessage output)
+            => Create(ssoFrame, reqFlag, reqUin, null, null, out output);
+
+        public static bool Create(SSOFrame ssoFrame, AuthFlag reqFlag, uint reqUin,
+            byte[] d2Token, byte[] d2Key, out ServiceMessage output)
         {
             var keyData = new byte[0];
             var headExtra = new byte[0];
@@ -145,7 +152,7 @@ namespace Konata.Core.Event
                     break;
             }
 
-            output = new EventServiceMessage
+            output = new ServiceMessage
             {
                 _authFlag = reqFlag,
                 _headUin = reqUin.ToString(),
@@ -158,9 +165,5 @@ namespace Konata.Core.Event
 
             return true;
         }
-
-        public static bool Create(EventSsoFrame ssoFrame, AuthFlag reqFlag,
-            uint reqUin, out EventServiceMessage output)
-            => Create(ssoFrame, reqFlag, reqUin, null, null, out output);
     }
 }

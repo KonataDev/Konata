@@ -5,21 +5,19 @@ using Konata.Core.Packet;
 using Konata.Core.Packet.Tlv;
 using Konata.Core.Packet.Tlv.TlvModel;
 using Konata.Core.Packet.Oicq;
-using Konata.Core.Manager;
 
 using Konata.Utils;
 using Konata.Utils.Crypto;
-using Konata.Runtime.Base.Event;
 
 namespace Konata.Core.Service.WtLogin
 {
     [SSOService("wtlogin.login", "WtLogin exchange")]
+    [Event(typeof(WtLoginEvent))]
     public class Login : ISSOService
     {
-        public bool HandleInComing(EventSsoFrame ssoFrame, out KonataEventArgs output)
+        public bool Parse(SSOFrame ssoFrame, SignInfo signinfo, out ProtocolEvent output)
         {
-            var sigManager = ssoFrame.Owner.GetComponent<UserSigManager>();
-            var oicqRequest = new OicqRequest(ssoFrame.Payload.GetBytes(), sigManager.ShareKey);
+            var oicqRequest = new OicqRequest(ssoFrame.Payload.GetBytes(), signinfo.ShareKey);
 
             Console.WriteLine($"  [oicqRequest] oicqCommand => {oicqRequest.oicqCommand}");
             Console.WriteLine($"  [oicqRequest] oicqVersion => {oicqRequest.oicqVersion}");
@@ -28,33 +26,32 @@ namespace Konata.Core.Service.WtLogin
             switch (oicqRequest.oicqStatus)
             {
                 case OicqStatus.OK:
-                    output = OnRecvWtloginSuccess(oicqRequest, sigManager.TgtgKey); break;
+                    output = OnRecvWtloginSuccess(oicqRequest, signinfo); break;
 
                 case OicqStatus.DoVerifySliderCaptcha:
-                    output = OnRecvCheckSliderCaptcha(oicqRequest); break;
+                    output = OnRecvCheckSliderCaptcha(oicqRequest, signinfo); break;
                 case OicqStatus.DoVerifyDeviceLockViaSms:
-                    output = OnRecvCheckSmsCaptcha(oicqRequest); break;
+                    output = OnRecvCheckSmsCaptcha(oicqRequest, signinfo); break;
 
                 case OicqStatus.PreventByIncorrectUserOrPwd:
-                    output = OnRecvInvalidUsrPwd(oicqRequest); break;
+                    output = OnRecvInvalidUsrPwd(oicqRequest, signinfo); break;
                 case OicqStatus.PreventByIncorrectSmsCode:
-                    output = OnRecvInvalidSmsCode(oicqRequest); break;
+                    output = OnRecvInvalidSmsCode(oicqRequest, signinfo); break;
                 case OicqStatus.PreventByInvalidEnvironment:
-                    output = OnRecvInvalidLoginEnv(oicqRequest); break;
+                    output = OnRecvInvalidLoginEnv(oicqRequest, signinfo); break;
                 case OicqStatus.PreventByLoginDenied:
-                    output = OnRecvLoginDenied(oicqRequest); break;
+                    output = OnRecvLoginDenied(oicqRequest, signinfo); break;
 
                 default:
                     output = OnRecvUnknown(); break;
             }
 
-            output.Owner = ssoFrame.Owner;
             return true;
         }
 
         #region Event Handlers
 
-        private KonataEventArgs OnRecvCheckSliderCaptcha(OicqRequest request)
+        private ProtocolEvent OnRecvCheckSliderCaptcha(OicqRequest request, SignInfo signinfo)
         {
             Console.WriteLine("Do slider verification.");
 
@@ -68,9 +65,10 @@ namespace Konata.Core.Service.WtLogin
                 var sigSession = ((T104Body)tlv104._tlvBody)._sigSession;
                 var sigCaptchaURL = ((T192Body)tlv192._tlvBody)._url;
 
+                signinfo.WtLoginSession = sigSession;
+
                 return new WtLoginEvent
                 {
-                    WtLoginSession = sigSession,
                     SliderURL = sigCaptchaURL,
                     EventType = WtLoginEvent.Type.CheckSlider
                 };
@@ -79,7 +77,7 @@ namespace Konata.Core.Service.WtLogin
             return OnRecvUnknown();
         }
 
-        private KonataEventArgs OnRecvCheckSmsCaptcha(OicqRequest request)
+        private ProtocolEvent OnRecvCheckSmsCaptcha(OicqRequest request, SignInfo signinfo)
         {
             Console.WriteLine("Do sms verification.");
 
@@ -109,15 +107,14 @@ namespace Konata.Core.Service.WtLogin
                     var smsCountryCode = ((T178Body)tlv178._tlvBody)._countryCode;
                     var smsToken = ((T174Body)tlv174._tlvBody)._smsToken;
 
+                    signinfo.WtLoginSession = sigSession;
+                    signinfo.WtLoginSmsPhone = smsPhone;
+                    signinfo.WtLoginSmsToken = smsToken;
+                    signinfo.WtLoginSmsCountry = smsCountryCode;
+
                     return new WtLoginEvent
                     {
-                        WtLoginSession = sigSession,
-                        SmsPhone = smsPhone,
-                        WtLoginSmsToken = smsToken,
-                        SmsCountry = smsCountryCode,
-
-                        EventType = WtLoginEvent.Type.RefreshSMS,
-                        EventMessage = sigMessage
+                        EventType = WtLoginEvent.Type.RefreshSMS
                     };
                 }
             }
@@ -130,9 +127,12 @@ namespace Konata.Core.Service.WtLogin
                 {
                     var sigSession = ((T104Body)tlv104._tlvBody)._sigSession;
 
+                    signinfo.WtLoginSession = sigSession;
+
                     return new WtLoginEvent
                     {
-                        WtLoginSession = sigSession,
+                        SmsPhone = signinfo.WtLoginSmsPhone,
+                        SmsCountry = signinfo.WtLoginSmsCountry,
                         EventType = WtLoginEvent.Type.CheckSMS
                     };
                 }
@@ -141,7 +141,7 @@ namespace Konata.Core.Service.WtLogin
             return OnRecvUnknown();
         }
 
-        private KonataEventArgs OnRecvResponseVerifyImageCaptcha(OicqRequest request)
+        private ProtocolEvent OnRecvResponseVerifyImageCaptcha(OicqRequest request, SignInfo signinfo)
         {
             // <TODO> Image captcha
 
@@ -152,7 +152,7 @@ namespace Konata.Core.Service.WtLogin
             };
         }
 
-        private KonataEventArgs OnRecvResponseVerifyDeviceLock(OicqRequest request)
+        private ProtocolEvent OnRecvResponseVerifyDeviceLock(OicqRequest request, SignInfo signinfo)
         {
             // <TODO> Device lock
 
@@ -163,7 +163,7 @@ namespace Konata.Core.Service.WtLogin
             };
         }
 
-        private KonataEventArgs OnRecvWtloginSuccess(OicqRequest request, byte[] tgtgKey)
+        private ProtocolEvent OnRecvWtloginSuccess(OicqRequest request, SignInfo signinfo)
         {
             Console.WriteLine("Wtlogin success.");
 
@@ -178,7 +178,7 @@ namespace Konata.Core.Service.WtLogin
                 if (tlv119 != null && tlv161 != null)
                 {
                     var decrypted = tlv119._tlvBody.TakeDecryptedBytes(out var _,
-                        TeaCryptor.Instance, tgtgKey);
+                        TeaCryptor.Instance, signinfo.TgtgKey);
 
                     var tlv119Unpacker = new TlvUnpacker(decrypted, true);
 
@@ -237,27 +237,23 @@ namespace Konata.Core.Service.WtLogin
                     Console.WriteLine($"d2Key => {Hex.Bytes2HexStr(d2Key)}");
                     Console.WriteLine($"d2Token => {Hex.Bytes2HexStr(d2Token)}");
 
+                    signinfo.TgtKey = tgtKey;
+                    signinfo.TgtToken = tgtToken;
+                    signinfo.D2Key = d2Key;
+                    signinfo.D2Token = d2Token;
+                    signinfo.WtSessionTicketSig = wtSessionTicketSig;
+                    signinfo.WtSessionTicketKey = wtSessionTicketKey;
+                    signinfo.GtKey = gtKey;
+                    signinfo.StKey = stKey;
+                    signinfo.UinInfo = new UinInfo
+                    {
+                        Age = userAge,
+                        Face = userFace,
+                        Name = userNickname
+                    };
+
                     return new WtLoginEvent
                     {
-                        TgtKey = tgtKey,
-                        TgtToken = tgtToken,
-
-                        D2Key = d2Key,
-                        D2Token = d2Token,
-
-                        GtKey = gtKey,
-                        StKey = stKey,
-
-                        WtSessionTicketSig = wtSessionTicketSig,
-                        WtSessionTicketKey = wtSessionTicketKey,
-
-                        UinInfo = new WtLoginEvent.Info
-                        {
-                            Age = userAge,
-                            Face = userFace,
-                            Name = userNickname
-                        },
-
                         EventType = WtLoginEvent.Type.OK
                     };
                 }
@@ -266,7 +262,7 @@ namespace Konata.Core.Service.WtLogin
             return OnRecvUnknown();
         }
 
-        private KonataEventArgs OnRecvInvalidUsrPwd(OicqRequest request)
+        private ProtocolEvent OnRecvInvalidUsrPwd(OicqRequest request, SignInfo signinfo)
         {
             return new WtLoginEvent
             {
@@ -275,7 +271,7 @@ namespace Konata.Core.Service.WtLogin
             };
         }
 
-        private KonataEventArgs OnRecvInvalidSmsCode(OicqRequest request)
+        private ProtocolEvent OnRecvInvalidSmsCode(OicqRequest request, SignInfo signinfo)
         {
             return new WtLoginEvent
             {
@@ -284,7 +280,7 @@ namespace Konata.Core.Service.WtLogin
             };
         }
 
-        private KonataEventArgs OnRecvInvalidLoginEnv(OicqRequest request)
+        private ProtocolEvent OnRecvInvalidLoginEnv(OicqRequest request, SignInfo signinfo)
         {
             var tlvs = request.oicqRequestBody.TakeAllBytes(out var _);
             var unpacker = new TlvUnpacker(tlvs, true);
@@ -305,7 +301,7 @@ namespace Konata.Core.Service.WtLogin
             return OnRecvUnknown();
         }
 
-        private KonataEventArgs OnRecvLoginDenied(OicqRequest request)
+        private ProtocolEvent OnRecvLoginDenied(OicqRequest request, SignInfo signinfo)
         {
             var tlvs = request.oicqRequestBody.TakeAllBytes(out var _);
             var unpacker = new TlvUnpacker(tlvs, true);
@@ -326,7 +322,7 @@ namespace Konata.Core.Service.WtLogin
             return OnRecvUnknown();
         }
 
-        private KonataEventArgs OnRecvUnknown()
+        private ProtocolEvent OnRecvUnknown()
         {
             return new WtLoginEvent
             {
@@ -337,86 +333,68 @@ namespace Konata.Core.Service.WtLogin
 
         #endregion
 
-        public bool HandleOutGoing(KonataEventArgs eventArg, out byte[] output)
+        public bool Build(Sequence sequence, WtLoginEvent input, SignInfo signInfo,
+            out int newSequece, out byte[] output)
         {
             output = null;
+            newSequece = sequence.NewSequence;
 
-            if (eventArg is WtLoginEvent e)
+            OicqRequest oicqRequest;
+
+            // Build OicqRequest
+            switch (input.EventType)
             {
-                var sigManager = e.Owner.GetComponent<UserSigManager>();
-                var ssoManager = e.Owner.GetComponent<SsoInfoManager>();
-                var configManager = e.Owner.GetComponent<ConfigComponent>();
+                case WtLoginEvent.Type.Tgtgt:
+                    oicqRequest = BuildRequestTgtgt(newSequece, signInfo);
+                    break;
 
-                OicqRequest oicqRequest;
-                var oicqKeyRing = new OicqKeyRing
+                case WtLoginEvent.Type.CheckSMS:
+                    oicqRequest = BuildRequestCheckSms(input.CaptchaResult, signInfo);
+                    break;
+
+                case WtLoginEvent.Type.RefreshSMS:
+                    oicqRequest = BuildRequestRefreshSms(signInfo);
+                    break;
+
+                case WtLoginEvent.Type.CheckSlider:
+                    oicqRequest = BuildRequestCheckSlider(input.CaptchaResult, signInfo);
+                    break;
+
+                default:
+                    return false;
+            }
+
+            // Build to service
+            if (SSOFrame.Create("wtlogin.login", PacketType.TypeA,
+                newSequece, sequence.Session, oicqRequest, out var ssoFrame))
+            {
+                if (ServiceMessage.Create(ssoFrame, AuthFlag.WtLoginExchange,
+                    signInfo.UinInfo.Uin, out var toService))
                 {
-                    tgtgKey = sigManager.TgtgKey,
-                    t106Key = sigManager.Tlv106Key,
-                    shareKey = sigManager.ShareKey,
-                    randKey = sigManager.RandKey,
-                    passwordMd5 = sigManager.PasswordMd5,
-                    defaultPublicKey = sigManager.DefaultPublicKey,
-                };
-
-                // Build OicqRequest
-                switch (e.EventType)
-                {
-                    case WtLoginEvent.Type.Tgtgt:
-                        oicqRequest = BuildRequestTgtgt(sigManager.Uin, ssoManager.NewSequence,
-                            oicqKeyRing, configManager);
-                        break;
-
-                    case WtLoginEvent.Type.CheckSMS:
-                        oicqRequest = BuildRequestCheckSms(sigManager.Uin, sigManager.WtLoginSession,
-                            sigManager.WtLoginSmsToken, e.CaptchaResult, sigManager.GSecret, oicqKeyRing);
-                        break;
-
-                    case WtLoginEvent.Type.RefreshSMS:
-                        oicqRequest = BuildRequestRefreshSms(sigManager.Uin, sigManager.WtLoginSession,
-                           sigManager.WtLoginSmsToken, oicqKeyRing);
-                        break;
-
-                    case WtLoginEvent.Type.CheckSlider:
-                        oicqRequest = BuildRequestCheckSlider(sigManager.Uin,
-                            sigManager.WtLoginSession, e.CaptchaResult, oicqKeyRing);
-                        break;
-
-                    default:
-                        return false;
-                }
-
-                // Build to service
-                if (EventSsoFrame.Create("wtlogin.login", PacketType.TypeA,
-                    ssoManager.NewSequence, ssoManager.Session, oicqRequest, out var ssoFrame))
-                {
-                    if (EventServiceMessage.Create(ssoFrame, AuthFlag.WtLoginExchange,
-                        sigManager.Uin, out var toService))
-                    {
-                        return EventServiceMessage.Build(toService, out output);
-                    }
+                    return ServiceMessage.Build(toService, out output);
                 }
             }
 
             return false;
         }
 
+        public bool Build(Sequence sequence, ProtocolEvent input, SignInfo signinfo,
+            out int outsequence, out byte[] output)
+            => Build(sequence, (WtLoginEvent)input, signinfo, out outsequence, out output);
+
         #region Event Builders
 
-        private OicqRequest BuildRequestTgtgt(uint uin, int ssoSequence,
-            OicqKeyRing keyRing, ConfigComponent configInfo)
-            => new OicqRequestTgtgt(uin, ssoSequence, keyRing);
+        private OicqRequest BuildRequestTgtgt(int sequence, SignInfo signinfo)
+            => new OicqRequestTgtgt(sequence, signinfo);
 
-        private OicqRequest BuildRequestCheckSms(uint uin, string session,
-            string smsToken, string smsCode, byte[] gSecret, OicqKeyRing keyRing)
-            => new OicqRequestCheckSms(uin, session, smsToken, smsCode, gSecret, keyRing);
+        private OicqRequest BuildRequestCheckSms(string code, SignInfo signinfo)
+            => new OicqRequestCheckSms(code, signinfo);
 
-        private OicqRequest BuildRequestCheckSlider(uint uin, string session,
-            string ticket, OicqKeyRing keyRing)
-            => new OicqRequestCheckImage(uin, session, ticket, keyRing);
+        private OicqRequest BuildRequestCheckSlider(string ticket, SignInfo signinfo)
+            => new OicqRequestCheckImage(ticket, signinfo);
 
-        private OicqRequest BuildRequestRefreshSms(uint uin, string session,
-            string smsToken, OicqKeyRing keyRing)
-            => new OicqRequestRefreshSms(uin, session, smsToken, keyRing);
+        private OicqRequest BuildRequestRefreshSms(SignInfo signinfo)
+            => new OicqRequestRefreshSms(signinfo);
 
         #endregion
     }

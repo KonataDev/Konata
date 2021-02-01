@@ -67,7 +67,7 @@ namespace Konata.Core.Entity
         /// Post an event to entity
         /// </summary>
         /// <param name="anyEvent"></param>
-        public void PostEntityEvent(BaseEvent anyEvent)
+        public void PostEventToEntity(BaseEvent anyEvent)
             => _eventHandler.SendAsync(anyEvent);
 
         /// <summary>
@@ -84,7 +84,7 @@ namespace Konata.Core.Entity
                 GetComponent<T>().EventPipeline.SendAsync(task);
             }
 
-            return task.Payload.Task;
+            return task.CompletionSource.Task;
         }
 
         /// <summary>
@@ -122,11 +122,14 @@ namespace Konata.Core.Entity
 
     public class KonataTask
     {
-        public TaskCompletionSource<BaseEvent> Payload { get; }
+        public BaseEvent EventPayload { get; }
+
+        public TaskCompletionSource<BaseEvent> CompletionSource { get; }
 
         public KonataTask(BaseEvent e)
         {
-            Payload = new TaskCompletionSource<BaseEvent>(e);
+            EventPayload = e;
+            CompletionSource = new TaskCompletionSource<BaseEvent>();
         }
     }
 }

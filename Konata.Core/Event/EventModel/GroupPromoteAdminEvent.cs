@@ -2,7 +2,7 @@
 
 namespace Konata.Core.Event
 {
-    public class GroupPromoteAdminEvent : BaseEvent
+    public class GroupPromoteAdminEvent : ProtocolEvent
     {
         /// <summary>
         /// <b>[In]</b> <br/>

@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Text;
 
-using Konata.Runtime.Base.Event;
-
 namespace Konata.Core.Event
 {
-    public class EventOnlineStatus : KonataEventArgs
+    public class OnlineStatusEvent : ProtocolEvent
     {
         public enum OnlineType
         {
@@ -63,7 +61,7 @@ namespace Konata.Core.Event
 
         /// <summary>
         /// <b>[Opt] [In]</b>   <br/>
-        ///   Kick PC while bot login.
+        ///   Kick PC while login.
         /// </summary>
         public bool IsKickPC { get; set; }
     }

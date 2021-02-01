@@ -3,7 +3,7 @@
 
 namespace Konata.Core.Event
 {
-    public class GroupKickMemberEvent : BaseEvent
+    public class GroupKickMemberEvent : ProtocolEvent
     {
         /// <summary>
         /// <b>[In]</b> <br/>

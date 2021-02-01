@@ -1,15 +1,16 @@
 ﻿using System;
 using System.Text;
 using System.Threading.Tasks;
-
+using Konata.Core.Entity;
 using Konata.Core.Event;
-using Konata.Core.Attribute;
 
 namespace Konata.Core.Manager
 {
     [Component("BusinessComponent", "Konata Business Component")]
     public class BusinessComponent : BaseComponent
     {
+        public string TAG = "BusinessComponent";
+
         public async Task<bool> Login()
             => await LoginLogic((WtLoginEvent)await PostEvent<PacketComponent>
                 (new WtLoginEvent { EventType = WtLoginEvent.Type.Tgtgt }));
@@ -63,5 +64,21 @@ namespace Konata.Core.Manager
                     MemberUin = memberUin,
                     ToggleType = toggleAdmin
                 });
+
+        public override void EventHandler(KonataTask task)
+        {
+            if (task.EventPayload is WtLoginEvent wtloginEvent)
+            {
+                LoginLogic(wtloginEvent).Wait();
+            }
+
+            //else if ()
+            //{
+
+            //}
+
+            else LogW(TAG, "Unsupported event received.");
+
+        }
     }
 }

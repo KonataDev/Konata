@@ -1,20 +1,20 @@
 ﻿using System;
 
-using Konata.Core.Packet;
 using Konata.Core.Event;
-using Konata.Runtime.Base.Event;
+using Konata.Core.Packet;
 
 namespace Konata.Core.Service.Heartbeat
 {
     [SSOService("Heartbeat.Alive", "Heartbeat for client")]
     public class Alive : ISSOService
     {
-        public bool HandleInComing(EventSsoFrame ssoMessage, out KonataEventArgs output)
+        public bool Parse(SSOFrame input, SignInfo signInfo, out ProtocolEvent output)
         {
             throw new NotImplementedException();
         }
 
-        public bool HandleOutGoing(KonataEventArgs original, out byte[] message)
+        public bool Build(Sequence sequence, ProtocolEvent input, SignInfo signInfo,
+            out int newSequence, out byte[] output)
         {
             throw new NotImplementedException();
         }

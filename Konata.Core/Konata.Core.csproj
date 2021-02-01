@@ -7,20 +7,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Utils\**" />
-    <EmbeddedResource Remove="Utils\**" />
-    <None Remove="Utils\**" />
+    <None Remove="Attribute\EventAttribute.cs~RF52d0041.TMP" />
+    <None Remove="Attribute\EventAttribute.cs~RF5593267.TMP" />
+    <None Remove="Attribute\SSOServiceAttribute.cs~RF37a02c.TMP" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="Component\BusinessComponent.cs~RF24ddb0e3.TMP" />
-    <None Remove="Event\EventOnlineStatus.cs~RF784d311d.TMP" />
-    <None Remove="Component\BusinessManager.cs~RF24d404ef.TMP" />
-    <None Remove="Event\LogEvent.cs~RF24ffc0eb.TMP" />
+    <PackageReference Include="System.Threading.Tasks.Dataflow" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Konata.Runtime\Konata.Runtime.csproj" />
     <ProjectReference Include="..\Konata.Utils\Konata.Utils.csproj" />
   </ItemGroup>
 

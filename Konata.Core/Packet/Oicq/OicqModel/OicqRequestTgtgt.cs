@@ -1,10 +1,10 @@
-﻿using System.IO;
-using System.Text;
-using Konata.Utils.Crypto;
-using Konata.Core.Packet.Protobuf;
+﻿using System;
+
+using Konata.Core.Types;
+using Konata.Core.Service;
 using Konata.Core.Packet.Tlv;
 using Konata.Core.Packet.Tlv.TlvModel;
-using Konata.Core.Types;
+using Konata.Core.Packet.Protobuf;
 
 namespace Konata.Core.Packet.Oicq
 {
@@ -15,16 +15,17 @@ namespace Konata.Core.Packet.Oicq
         private const ushort OicqCommand = 0x0810;
         private const ushort OicqSubCommand = 0x0009;
 
-        public OicqRequestTgtgt(uint uin, int ssoSequence, OicqKeyRing keyRing)
-            : base(OicqCommand, OicqSubCommand, uin, OicqEncryptMethod.ECDH135,
-                  new XTGTGT(uin, ssoSequence, keyRing), keyRing.shareKey, keyRing.randKey, keyRing.defaultPublicKey)
+        public OicqRequestTgtgt(int sequence, SignInfo signinfo)
+            : base(OicqCommand, OicqSubCommand, signinfo.UinInfo.Uin, OicqEncryptMethod.ECDH135,
+                  new XTGTGT(signinfo.UinInfo.Uin, sequence, signinfo),
+                  signinfo.ShareKey, signinfo.RandKey, signinfo.DefaultPublicKey)
         {
 
         }
 
         public class XTGTGT : OicqRequestBody
         {
-            public XTGTGT(uint uin, int ssoSequence, OicqKeyRing keyRing)
+            public XTGTGT(uint uin, int ssoSequence, SignInfo signinfo)
                 : base()
             {
                 // 設備訊息上報
@@ -46,7 +47,8 @@ namespace Konata.Core.Packet.Oicq
                     tlvs.PutTlv(new Tlv(0x0001, new T1Body(uin, DeviceInfo.Network.Wifi.IpAddress)));
 
                     tlvs.PutTlv(new Tlv(0x0106, new T106Body(Default.AppId, Default.SubAppId, Default.AppClientVersion,
-                        uin, new byte[4], true, keyRing.passwordMd5, 0, true, DeviceInfo.Guid, LoginType.Password, keyRing.tgtgKey), keyRing.t106Key));
+                        uin, new byte[4], true, signinfo.PasswordMd5, 0, true, DeviceInfo.Guid, LoginType.Password,
+                        signinfo.TgtgKey), signinfo.Tlv106Key));
 
                     tlvs.PutTlv(new Tlv(0x0116, new T116Body(Default.WtLoginSdk.MiscBitmap | (uint)WtLoginSigType.WLOGIN_DA2,
                         Default.WtLoginSdk.SubSigBitmap, Default.WtLoginSdk.SubAppIdList)));
@@ -61,7 +63,7 @@ namespace Konata.Core.Packet.Oicq
                         DeviceInfo.Network.Type, DeviceInfo.Network.Mobile.OperatorName,
                         DeviceInfo.Network.Wifi.ApnName, true, true, false,
                         DeviceInfo.Guid, 285212672, DeviceInfo.System.ModelName,
-                        DeviceInfo.System.Manufacturer), keyRing.tgtgKey));
+                        DeviceInfo.System.Manufacturer), signinfo.TgtgKey));
 
                     tlvs.PutTlv(new Tlv(0x0145, new T145Body(DeviceInfo.Guid)));
 
