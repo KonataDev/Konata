@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <None Remove="Attribute\ComponentAttribute.cs~RFa9c9eb6.TMP" />
+    <None Remove="BotConfig.cs~RFe9b01ba.TMP" />
   </ItemGroup>
 
   <ItemGroup>

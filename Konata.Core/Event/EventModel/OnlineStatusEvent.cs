@@ -5,7 +5,7 @@ namespace Konata.Core.Event.EventModel
 {
     public class OnlineStatusEvent : ProtocolEvent
     {
-        public enum OnlineType
+        public enum Type
         {
             Online = 11,
             Offline = 21,
@@ -16,7 +16,7 @@ namespace Konata.Core.Event.EventModel
             DoNotDistrub = 70,
         }
 
-        public enum OnlineSubType
+        public enum SubType
         {
             Normal = 0,
             Offline = 255,
@@ -43,14 +43,14 @@ namespace Konata.Core.Event.EventModel
         /// <b>[In]</b>          <br/>
         ///   Online main type.  <br/>
         /// </summary>
-        public OnlineType Type { get; set; }
+        public Type EventType { get; set; }
 
         /// <summary>
         /// <b>[Opt] [In]</b>   <br/>
         ///   Online sub type.  <br/>
         ///     - Only valid in <b>OnlineType.Online</b>
         /// </summary>
-        public OnlineSubType SubType { get; set; }
+        public SubType EventSubType { get; set; }
 
         /// <summary>
         /// <b>[Opt] [In]</b>   <br/>

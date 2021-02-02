@@ -18,9 +18,8 @@ namespace Konata.Core.Service.StatSvc
 
             output = new OnlineStatusEvent
             {
-                Type = svcResponse.status ?
-                    OnlineStatusEvent.OnlineType.Online :
-                    OnlineStatusEvent.OnlineType.Offline,
+                EventType = svcResponse.status ?
+                    OnlineStatusEvent.Type.Online : OnlineStatusEvent.Type.Offline,
             };
 
             return true;
@@ -38,7 +37,7 @@ namespace Konata.Core.Service.StatSvc
                 bid = 7,
                 connType = 0,
                 other = "",
-                status = (int)input.Type,
+                status = (int)input.EventType,
                 onlinePush = 0,
                 isOnline = 0,
                 isShowOnline = 0,

@@ -12,9 +12,31 @@ namespace Konata.Core.Component
     {
         public string TAG = "BusinessComponent";
 
+        private OnlineStatusEvent.Type _onlineType;
+
+        public BusinessComponent()
+        {
+            _onlineType = OnlineStatusEvent.Type.Offline;
+        }
+
         public async Task<bool> Login()
-            => await LoginLogic((WtLoginEvent)await PostEvent<PacketComponent>
-                (new WtLoginEvent { EventType = WtLoginEvent.Type.Tgtgt }));
+        {
+            if (_onlineType == OnlineStatusEvent.Type.Offline)
+            {
+                if (!await GetComponent<SocketComponent>().Connect(true))
+                {
+                    return false;
+                }
+
+                var result = await PostEvent<PacketComponent>
+                     (new WtLoginEvent { EventType = WtLoginEvent.Type.Tgtgt });
+
+                return await LoginLogic((WtLoginEvent)result);
+            }
+
+            LogW(TAG, "Calling Login method again while online.");
+            return false;
+        }
 
         public async Task<bool> RefreshSMSCode()
         => await LoginLogic((WtLoginEvent)await PostEvent<PacketComponent>
@@ -73,13 +95,17 @@ namespace Konata.Core.Component
                 LoginLogic(wtloginEvent).Wait();
             }
 
+            else if (task.EventPayload is OnlineStatusEvent onlineStatusEvent)
+            {
+                _onlineType = onlineStatusEvent.EventType;
+            }
+
             //else if ()
             //{
 
             //}
 
             else LogW(TAG, "Unsupported event received.");
-
         }
     }
 }

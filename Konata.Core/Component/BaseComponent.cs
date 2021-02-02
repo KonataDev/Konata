@@ -48,9 +48,11 @@ namespace Konata.Core.Component
         protected void LogE(string tag, string content)
             => Log(LogLevel.Exception, tag, content);
 
+        protected void LogE(string tag, Exception e)
+            => LogE(tag, $"{e.Message}\n{e.StackTrace}");
+
         protected void LogF(string tag, string content)
             => Log(LogLevel.Fatal, tag, content);
-
         #endregion
     }
 }

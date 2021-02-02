@@ -1,19 +1,32 @@
 ﻿using System;
+using System.Linq;
 using System.Net.Sockets;
-using System.Net.NetworkInformation;
+using System.Threading.Tasks;
+
+using Konata.Utils;
+using Konata.Core.Event;
+using Konata.Core.Event.EventModel;
+using Konata.Core.Entity;
 
 namespace Konata.Core.Component
 {
     [Component("SocketComponent", "Konata Socket Client Component")]
     public class SocketComponent : BaseComponent
     {
-        public struct ServerInfo
+        private enum ReceiveStatus
+        {
+            Idle,
+            RecvBody,
+            Stop
+        }
+
+        private struct ServerInfo
         {
             public string Host;
             public int Port;
         }
 
-        public static ServerInfo[] DefaultServers { get; } =
+        private static ServerInfo[] DefaultServers { get; } =
         {
             new ServerInfo { Host = "127.0.0.1", Port = 8080 },
             new ServerInfo { Host = "msfwifi.3g.qq.com", Port = 8080 },
@@ -28,15 +41,25 @@ namespace Konata.Core.Component
             new ServerInfo { Host = "203.205.255.221", Port = 8080 },
         };
 
-        private TcpClient _client;
-        private NetworkStream _clientStream;
+        public string TAG = "SocketComponent";
+
+        private Socket _socket;
+
+        private int _packetLength;
+
+        private int _recvLength;
+        private byte[] _recvBuffer;
+        private ReceiveStatus _recvStatus;
 
         ~SocketComponent()
-            => _client.Dispose();
+            => _socket.Dispose();
 
         public SocketComponent()
         {
-            _client = new TcpClient();
+            _recvBuffer = new byte[2048];
+            _recvStatus = ReceiveStatus.Idle;
+
+            _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
         }
 
         /// <summary>
@@ -44,7 +67,7 @@ namespace Konata.Core.Component
         /// </summary>
         /// <param name="useLowLentency"><b>[Opt] </b>Auto select low letency server to connect.</param>
         /// <returns></returns>
-        public bool Connect(bool useLowLentency = false)
+        public Task<bool> Connect(bool useLowLentency = false)
         {
             var lowestTime = long.MaxValue;
             var selectHost = DefaultServers[0];
@@ -53,7 +76,7 @@ namespace Konata.Core.Component
             {
                 foreach (var item in DefaultServers)
                 {
-                    var time = PingTest(item.Host, 2000);
+                    var time = Network.PingTest(item.Host, 2000);
                     {
                         if (time < lowestTime)
                         {
@@ -72,80 +95,170 @@ namespace Konata.Core.Component
         /// </summary>
         /// <param name="useLowLentency"><b>[Opt] </b>Auto select low letency server to connect.</param>
         /// <returns></returns>
-        public bool Connect(string hostIp, int port)
+        public Task<bool> Connect(string hostIp, int port)
         {
-            _client.Connect(hostIp, port);
+            try
             {
-                if (_client.Connected)
+                _socket.BeginConnect(hostIp, port, BeginConnect, null);
+            }
+            catch (Exception e)
+            {
+                LogW(TAG, $"Connect failed. \n {e.Message} \n {e.StackTrace}");
+            }
+
+            return Task.FromResult(_socket.Connected);
+        }
+
+        /// <summary>
+        /// Begin connect
+        /// </summary>
+        /// <param name="result"></param>
+        private void BeginConnect(IAsyncResult result)
+        {
+            try
+            {
+                _socket.EndConnect(result);
+                _socket.BeginReceive(_recvBuffer, 0, _recvBuffer.Length, SocketFlags.None, BeginReceive, null);
+            }
+            catch (Exception e)
+            {
+                LogE(TAG, $"BeginConnect failed. \n {e.Message} \n {e.StackTrace}");
+            }
+        }
+
+        /// <summary>
+        /// Begin receive data
+        /// </summary>
+        /// <param name="result"></param>
+        private void BeginReceive(IAsyncResult result)
+        {
+            try
+            {
+                _recvLength += _socket.EndReceive(result);
+
+                if (_recvStatus == ReceiveStatus.Idle)
                 {
-                    _clientStream = _client.GetStream();
+                    if (_recvLength < 4) return;
+
+                    _packetLength = BitConverter.ToInt32(_recvBuffer.Take(4).Reverse().ToArray(), 0);
+                    if (_recvBuffer.Length < _packetLength)
+                        Array.Resize(ref _recvBuffer, _packetLength);
+
+                    _recvStatus = ReceiveStatus.RecvBody;
                 }
-            }
 
-            return _client.Connected;
-        }
-
-        /// <summary>
-        /// Disconnect to server
-        /// </summary>
-        /// <returns></returns>
-        public void DisConnect()
-        {
-            if (_client.Connected)
-            {
-                _client.Close();
-            }
-
-            // BroadcastEvent(null);
-        }
-
-        /// <summary>
-        /// Send data to server
-        /// </summary>
-        /// <param name="data"><b>[In] </b>Data buffer to send</param>
-        /// <param name="recv"><b>[Out] </b>Return received buffer</param>
-        /// <returns></returns>
-        public bool SendData(byte[] data, out byte[] recv)
-        {
-            recv = null;
-
-            if (!_client.Connected)
-            {
-                return false;
-            }
-
-            _clientStream.Write(data, 0, data.Length);
-            return true;
-        }
-
-        //private bool RecvData(out byte[] recv)
-        //{
-        //    if (!_client.Connected)
-        //    {
-
-        //    }
-        //}
-
-        /// <summary>
-        /// Pinging IP
-        /// </summary>
-        /// <param name="hostIp"><b>[In] </b>Host IP adress</param>
-        /// <param name="timeout"><b>[Opt] </b>Pinging timeout default 1000 ms</param>
-        /// <returns></returns>
-        public static long PingTest(string hostIp, int timeout = 1000)
-        {
-            using (var ping = new Ping())
-            {
-                var reply = ping.Send(hostIp, timeout);
+                if (_recvStatus == ReceiveStatus.RecvBody)
                 {
-                    if (reply.Status == IPStatus.Success)
+                    if (_recvLength == _packetLength)
                     {
-                        return reply.RoundtripTime;
+                        _recvLength = 0;
+                        _recvStatus = ReceiveStatus.Idle;
+
+                        var packet = new byte[_recvBuffer.Length];
+                        {
+                            _recvBuffer.CopyTo(packet, 0);
+                            OnReceivePacket(packet);
+                        }
                     }
                 }
             }
+            catch (Exception e)
+            {
+                LogE(TAG, e);
+                DisConnect($"Socket error while receiving data. ");
+            }
+            finally
+            {
+                if (_recvStatus != ReceiveStatus.Stop)
+                {
+                    _socket.BeginReceive(_recvBuffer, _recvLength, _recvBuffer.Length - _recvLength,
+                        SocketFlags.None, BeginReceive, null);
+                }
+            }
+        }
 
-            return long.MaxValue;
+        private void BeginSendData(IAsyncResult result)
+        {
+            try
+            {
+                _socket.EndSend(result);
+            }
+            catch (Exception e)
+            {
+                LogE(TAG, e);
+                DisConnect($"Socket error while sending data.");
+            }
+        }
+
+        /// <summary>
+        /// On Received a packet 
+        /// </summary>
+        /// <param name="buffer"></param>
+        private void OnReceivePacket(byte[] buffer)
+            => PostEvent<PacketComponent>(new PacketEvent
+            {
+                Buffer = buffer
+            });
+
+        /// <summary>
+        /// Send packet to server
+        /// </summary>
+        /// <param name="data"><b>[In] </b>Data buffer to send</param>
+        /// <returns></returns>
+        public Task<bool> SendData(byte[] data)
+        {
+            if (!_socket.Connected)
+            {
+                LogW(TAG, "Calling SendData method after socket disconnected.");
+                return Task.FromResult(false);
+            }
+
+            try
+            {
+                _socket.BeginSend(data, 0, data.Length, SocketFlags.None, BeginSendData, null);
+            }
+            catch (Exception e)
+            {
+                LogE(TAG, e);
+                return Task.FromResult(false);
+            }
+
+            return Task.FromResult(true);
+        }
+
+        /// <summary>
+        /// Disconnect from server
+        /// </summary>
+        /// <param name="reason"></param>
+        public Task<bool> DisConnect(string reason)
+        {
+            if (!_socket.Connected)
+            {
+                LogW(TAG, "Calling DisConnect method after socket disconnected.");
+                return Task.FromResult(false);
+            }
+
+            _socket.Close();
+
+            PostEvent<BusinessComponent>(new OnlineStatusEvent
+            {
+                EventType = OnlineStatusEvent.Type.Offline,
+                EventMessage = reason
+            });
+
+            return Task.FromResult(true);
+        }
+
+        public override void EventHandler(KonataTask task)
+        {
+            if (task.EventPayload is PacketEvent packetEvent)
+            {
+                SendData(packetEvent.Buffer);
+            }
+            else
+            {
+                LogW(TAG, "Unsuported event received.");
+            }
         }
     }
 }
