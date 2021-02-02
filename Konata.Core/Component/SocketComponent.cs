@@ -103,7 +103,8 @@ namespace Konata.Core.Component
             }
             catch (Exception e)
             {
-                LogW(TAG, $"Connect failed. \n {e.Message} \n {e.StackTrace}");
+                LogE(TAG, "Connect failed.");
+                LogE(TAG, e);
             }
 
             return Task.FromResult(_socket.Connected);
@@ -122,7 +123,8 @@ namespace Konata.Core.Component
             }
             catch (Exception e)
             {
-                LogE(TAG, $"BeginConnect failed. \n {e.Message} \n {e.StackTrace}");
+                LogE(TAG, "BeginConnect failed.");
+                LogE(TAG, e);
             }
         }
 
@@ -257,7 +259,7 @@ namespace Konata.Core.Component
             }
             else
             {
-                LogW(TAG, "Unsuported event received.");
+                LogW(TAG, "Unsupported event received.");
             }
         }
     }
