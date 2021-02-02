@@ -1,6 +1,6 @@
 ﻿using System;
 
-using Konata.Core.Types;
+using Konata.Core;
 using Konata.Core.Service;
 using Konata.Core.Packet.Tlv;
 using Konata.Core.Packet.Tlv.TlvModel;
@@ -43,20 +43,20 @@ namespace Konata.Core.Packet.Oicq
                 // 構建 tlv
                 TlvPacker tlvs = new TlvPacker();
                 {
-                    tlvs.PutTlv(new Tlv(0x0018, new T18Body(Default.AppId, Default.AppClientVersion, uin)));
+                    tlvs.PutTlv(new Tlv(0x0018, new T18Body(AppInfo.AppId, AppInfo.AppClientVersion, uin)));
                     tlvs.PutTlv(new Tlv(0x0001, new T1Body(uin, DeviceInfo.Network.Wifi.IpAddress)));
 
-                    tlvs.PutTlv(new Tlv(0x0106, new T106Body(Default.AppId, Default.SubAppId, Default.AppClientVersion,
+                    tlvs.PutTlv(new Tlv(0x0106, new T106Body(AppInfo.AppId, AppInfo.SubAppId, AppInfo.AppClientVersion,
                         uin, new byte[4], true, signinfo.PasswordMd5, 0, true, DeviceInfo.Guid, LoginType.Password,
                         signinfo.TgtgKey), signinfo.Tlv106Key));
 
-                    tlvs.PutTlv(new Tlv(0x0116, new T116Body(Default.WtLoginSdk.MiscBitmap | (uint)WtLoginSigType.WLOGIN_DA2,
-                        Default.WtLoginSdk.SubSigBitmap, Default.WtLoginSdk.SubAppIdList)));
+                    tlvs.PutTlv(new Tlv(0x0116, new T116Body(AppInfo.WtLoginSdk.MiscBitmap | (uint)WtLoginSigType.WLOGIN_DA2,
+                        AppInfo.WtLoginSdk.SubSigBitmap, AppInfo.WtLoginSdk.SubAppIdList)));
 
-                    tlvs.PutTlv(new Tlv(0x0100, new T100Body(Default.AppId, Default.SubAppId, Default.AppClientVersion)));
+                    tlvs.PutTlv(new Tlv(0x0100, new T100Body(AppInfo.AppId, AppInfo.SubAppId, AppInfo.AppClientVersion)));
 
                     tlvs.PutTlv(new Tlv(0x0107, new T107Body()));
-                    tlvs.PutTlv(new Tlv(0x0142, new T142Body(Default.ApkPackageName)));
+                    tlvs.PutTlv(new Tlv(0x0142, new T142Body(AppInfo.ApkPackageName)));
 
                     tlvs.PutTlv(new Tlv(0x0144, new T144Body(DeviceInfo.System.AndroidId,
                         report, DeviceInfo.System.Os, DeviceInfo.System.OsVersion,
@@ -67,7 +67,7 @@ namespace Konata.Core.Packet.Oicq
 
                     tlvs.PutTlv(new Tlv(0x0145, new T145Body(DeviceInfo.Guid)));
 
-                    tlvs.PutTlv(new Tlv(0x0147, new T147Body(Default.AppId, Default.ApkVersionName, Default.ApkSignatureMd5)));
+                    tlvs.PutTlv(new Tlv(0x0147, new T147Body(AppInfo.AppId, AppInfo.ApkVersionName, AppInfo.ApkSignatureMd5)));
                     // tlvs.PushTlv(new 166());
 
                     tlvs.PutTlv(new Tlv(0x0154, new T154Body(ssoSequence)));
@@ -102,7 +102,7 @@ namespace Konata.Core.Packet.Oicq
                     tlvs.PutTlv(new Tlv(0x0202, new T202Body(DeviceInfo.Network.Wifi.ApMacAddress,
                         DeviceInfo.Network.Wifi.Ssid)));
 
-                    tlvs.PutTlv(new Tlv(0x0177, new T177Body(Default.WtLoginSdk.SdkBuildTime, Default.WtLoginSdk.SdkVersion)));
+                    tlvs.PutTlv(new Tlv(0x0177, new T177Body(AppInfo.WtLoginSdk.SdkBuildTime, AppInfo.WtLoginSdk.SdkVersion)));
 
                     tlvs.PutTlv(new Tlv(0x0516, new T516Body()));
                     tlvs.PutTlv(new Tlv(0x0521, new T521Body()));

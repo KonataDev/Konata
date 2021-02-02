@@ -63,7 +63,7 @@ namespace Konata.Core.Packet.Oicq
                     PutByte((byte)method);
                     PutByte(0x00); // 永遠0
                     PutUintBE(2);
-                    PutUintBE(Default.AppClientVersion);
+                    PutUintBE(AppInfo.AppClientVersion);
                     PutUintBE(0);
 
                     PutOicqRequestBody(oicqRequestBody, shareKey, randKey, publicKey);

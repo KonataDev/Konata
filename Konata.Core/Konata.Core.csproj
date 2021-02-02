@@ -2,14 +2,12 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Copyright>(C) 2020 Konata Project</Copyright>
+    <Copyright>(C) 2021 Konata Project</Copyright>
     <PackageLicenseExpression>AGPL-3.0 License</PackageLicenseExpression>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Attribute\EventAttribute.cs~RF52d0041.TMP" />
-    <None Remove="Attribute\EventAttribute.cs~RF5593267.TMP" />
-    <None Remove="Attribute\SSOServiceAttribute.cs~RF37a02c.TMP" />
+    <None Remove="Attribute\ComponentAttribute.cs~RFa9c9eb6.TMP" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,7 +1,7 @@
 ﻿using System;
 using Konata.Utils.Protobuf;
 
-namespace Konata.Packets.Protobuf
+namespace Konata.Core.Packet.Protobuf
 {
     /// <summary>
     /// 撤回群訊息 PbMsgWithDraw

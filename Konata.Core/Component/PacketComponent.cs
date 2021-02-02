@@ -10,16 +10,16 @@ using Konata.Core.Entity;
 using Konata.Core.Service;
 using Konata.Core.Packet;
 
-namespace Konata.Core.Manager
+namespace Konata.Core.Component
 {
     [Component("PacketComponent", "Konata Packet Translation Component")]
     public class PacketComponent : BaseComponent
     {
         private const string TAG = "PacketComponent";
 
-        private Dictionary<string, ISSOService> _services;
-        private Dictionary<Type, ISSOService> _servicesType;
-        private Dictionary<Type, List<ISSOService>> _servicesEventType;
+        private Dictionary<string, IService> _services;
+        private Dictionary<Type, IService> _servicesType;
+        private Dictionary<Type, List<IService>> _servicesEventType;
 
         private ConcurrentDictionary<int, TaskCompletionSource<BaseEvent>> _pendingRequests;
 
@@ -28,9 +28,9 @@ namespace Konata.Core.Manager
         public PacketComponent()
         {
             _serviceSequence = new Sequence();
-            _services = new Dictionary<string, ISSOService>();
-            _servicesType = new Dictionary<Type, ISSOService>();
-            _servicesEventType = new Dictionary<Type, List<ISSOService>>();
+            _services = new Dictionary<string, IService>();
+            _servicesType = new Dictionary<Type, IService>();
+            _servicesEventType = new Dictionary<Type, List<IService>>();
             _pendingRequests = new ConcurrentDictionary<int, TaskCompletionSource<BaseEvent>>();
 
             LoadService();
@@ -44,18 +44,18 @@ namespace Konata.Core.Manager
             // Initialize protocol event types
             foreach (var type in Reflection.GetChildClasses<ProtocolEvent>())
             {
-                _servicesEventType.Add(type, new List<ISSOService>());
+                _servicesEventType.Add(type, new List<IService>());
             }
 
             // Create sso services
-            foreach (var type in Reflection.GetClassesByAttribute<SSOServiceAttribute>())
+            foreach (var type in Reflection.GetClassesByAttribute<ServiceAttribute>())
             {
                 var eventAttrs = type.GetCustomAttributes<EventAttribute>();
-                var serviceAttr = type.GetCustomAttribute<SSOServiceAttribute>();
+                var serviceAttr = type.GetCustomAttribute<ServiceAttribute>();
 
                 if (serviceAttr != null)
                 {
-                    var service = (ISSOService)Activator.CreateInstance(type);
+                    var service = (IService)Activator.CreateInstance(type);
 
                     // Bind service name with service
                     _services.Add(serviceAttr.ServiceName, service);

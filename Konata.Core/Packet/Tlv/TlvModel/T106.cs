@@ -1,6 +1,7 @@
-﻿using Konata.Core.Types;
-using System;
+﻿using System;
 using Guid = Konata.Utils.Guid;
+
+using Konata.Core;
 
 namespace Konata.Core.Packet.Tlv.TlvModel
 {

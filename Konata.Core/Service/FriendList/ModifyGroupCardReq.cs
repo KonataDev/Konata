@@ -1,14 +1,15 @@
 ﻿using System;
 
 using Konata.Core.Event;
+using Konata.Core.Event.EventModel;
 using Konata.Core.Packet;
 using Konata.Core.Packet.SvcRequest;
 
 namespace Konata.Core.Service.Friendlist
 {
-    [SSOService("friendlist.ModifyGroupCardReq", "Modify group card")]
+    [Service("friendlist.ModifyGroupCardReq", "Modify group card")]
     [Event(typeof(GroupModifyMemberCardEvent))]
-    public class ModifyGroupCardReq : ISSOService
+    public class ModifyGroupCardReq : IService
     {
         public bool Parse(SSOFrame input, SignInfo signInfo, out ProtocolEvent output)
         {

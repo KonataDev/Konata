@@ -1,6 +1,7 @@
 ﻿using System;
 
 using Konata.Core.Event;
+using Konata.Core.Event.EventModel;
 using Konata.Core.Packet;
 using Konata.Core.Packet.Tlv;
 using Konata.Core.Packet.Tlv.TlvModel;
@@ -11,9 +12,9 @@ using Konata.Utils.Crypto;
 
 namespace Konata.Core.Service.WtLogin
 {
-    [SSOService("wtlogin.login", "WtLogin exchange")]
+    [Service("wtlogin.login", "WtLogin exchange")]
     [Event(typeof(WtLoginEvent))]
-    public class Login : ISSOService
+    public class Login : IService
     {
         public bool Parse(SSOFrame ssoFrame, SignInfo signinfo, out ProtocolEvent output)
         {
@@ -249,7 +250,8 @@ namespace Konata.Core.Service.WtLogin
                     {
                         Age = userAge,
                         Face = userFace,
-                        Name = userNickname
+                        Name = userNickname,
+                        Uin = signinfo.UinInfo.Uin
                     };
 
                     return new WtLoginEvent

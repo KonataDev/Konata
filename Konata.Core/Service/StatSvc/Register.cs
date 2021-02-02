@@ -1,15 +1,16 @@
 ﻿using System;
 
 using Konata.Core.Event;
+using Konata.Core.Event.EventModel;
 using Konata.Core.Packet;
 using Konata.Core.Packet.SvcRequest;
 using Konata.Core.Packet.SvcResponse;
 
 namespace Konata.Core.Service.StatSvc
 {
-    [SSOService("StatSvc.register", "Register client")]
+    [Service("StatSvc.register", "Register client")]
     [Event(typeof(OnlineStatusEvent))]
-    public class Register : ISSOService
+    public class Register : IService
     {
         public bool Parse(SSOFrame input, SignInfo signinfo, out ProtocolEvent output)
         {

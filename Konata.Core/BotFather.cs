@@ -4,7 +4,7 @@ using System.Threading.Tasks.Dataflow;
 
 using Konata.Core.Utils;
 using Konata.Core.Event;
-using Konata.Core.Manager;
+using Konata.Core.Component;
 
 namespace Konata.Core
 {
@@ -43,8 +43,8 @@ namespace Konata.Core
             ActionBlock<BaseEvent> handler)
             => CreateBot(handler, new BotConfig
             {
-                BotUin = botUin,
-                BotPassword = botPassword,
+                Uin = botUin,
+                Password = botPassword,
             });
     }
 }

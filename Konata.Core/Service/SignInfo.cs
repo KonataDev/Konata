@@ -5,7 +5,7 @@ using System.Text;
 
 using Konata.Utils.Crypto;
 using Konata.Core.Packet.Oicq;
-using Konata.Packets.Protobuf;
+using Konata.Core.Packet.Protobuf;
 
 namespace Konata.Core.Service
 {
@@ -113,6 +113,8 @@ namespace Konata.Core.Service
 
         public SignInfo(uint uin, string password)
         {
+            UinInfo = new UinInfo { Uin = uin };
+
             PasswordMd5 = new Md5Cryptor().Encrypt(Encoding.UTF8.GetBytes(password));
             Tlv106Key = new Md5Cryptor().Encrypt(PasswordMd5
                         .Concat(new byte[] { 0x00, 0x00, 0x00, 0x00 })

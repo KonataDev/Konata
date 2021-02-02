@@ -5,8 +5,8 @@ using Konata.Core.Packet;
 
 namespace Konata.Core.Service.PbMessageSvc
 {
-    [SSOService("PbMessageSvc.PbMessageWithDraw", "Withdraw message")]
-    public class PbMessageWithDraw : ISSOService
+    [Service("PbMessageSvc.PbMessageWithDraw", "Withdraw message")]
+    public class PbMessageWithDraw : IService
     {
         public bool Parse(SSOFrame input, SignInfo signInfo, out ProtocolEvent output)
         {

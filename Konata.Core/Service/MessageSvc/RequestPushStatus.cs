@@ -5,8 +5,8 @@ using Konata.Core.Event;
 
 namespace Konata.Core.Service.MessageSvc
 {
-    [SSOService("MessageSvc.RequestPushStatus", "Request push status")]
-    public class RequestPushStatus : ISSOService
+    [Service("MessageSvc.RequestPushStatus", "Request push status")]
+    public class RequestPushStatus : IService
     {
         public bool Parse(SSOFrame input, SignInfo signInfo, out ProtocolEvent output)
         {

@@ -5,8 +5,8 @@ using Konata.Core.Packet;
 
 namespace Konata.Core.Service.MessageSvc
 {
-    [SSOService("MessageSvc.PbDeleteMsg", "Delete message")]
-    public class PbDeleteMsg : ISSOService
+    [Service("MessageSvc.PbDeleteMsg", "Delete message")]
+    public class PbDeleteMsg : IService
     {
         public bool Parse(SSOFrame input, SignInfo signInfo, out ProtocolEvent output)
         {

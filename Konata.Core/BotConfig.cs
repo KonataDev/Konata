@@ -1,15 +1,15 @@
 ﻿using System;
-using System.Text;
 
 namespace Konata.Core
 {
     public class BotConfig
     {
-        public uint BotUin;
-        public string BotPassword;
+        public uint Uin { get; set; }
 
-        public bool ReConnectWhileLinkDown = true;
-        public uint ReConnectTryCount = 3;
+        public string Password { get; set; }
 
+        public bool ReConnectWhileLinkDown { get; set; } = true;
+
+        public uint ReConnectTryCount { get; set; } = 3;
     }
 }

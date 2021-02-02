@@ -1,5 +1,4 @@
-﻿using Konata.Core.Types;
-using System;
+﻿using System;
 
 namespace Konata.Core.Packet.Tlv.TlvModel
 {

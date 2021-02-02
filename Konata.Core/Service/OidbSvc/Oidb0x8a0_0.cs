@@ -1,14 +1,15 @@
 ﻿using System;
 
 using Konata.Core.Event;
+using Konata.Core.Event.EventModel;
 using Konata.Core.Packet;
 using Konata.Core.Packet.Oidb.OidbModel;
 
 namespace Konata.Core.Service.OidbSvc
 {
-    [SSOService("OidbSvc.0x8a0_0", "Kick members in the group by batch")]
+    [Service("OidbSvc.0x8a0_0", "Kick members in the group by batch")]
     [Event(typeof(GroupKickMembersEvent))]
-    class Oidb0x8a0_0 : ISSOService
+    class Oidb0x8a0_0 : IService
     {
         public bool Parse(SSOFrame input, SignInfo signInfo, out ProtocolEvent output)
         {

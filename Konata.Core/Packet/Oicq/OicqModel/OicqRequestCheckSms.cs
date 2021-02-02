@@ -29,8 +29,8 @@ namespace Konata.Core.Packet.Oicq
                 {
                     tlvs.PutTlv(new Tlv(0x0008, new T8Body(2052)));
                     tlvs.PutTlv(new Tlv(0x0104, new T104Body(session)));
-                    tlvs.PutTlv(new Tlv(0x0116, new T116Body(Default.WtLoginSdk.MiscBitmap,
-                        Default.WtLoginSdk.SubSigBitmap, Default.WtLoginSdk.SubAppIdList)));
+                    tlvs.PutTlv(new Tlv(0x0116, new T116Body(AppInfo.WtLoginSdk.MiscBitmap,
+                        AppInfo.WtLoginSdk.SubSigBitmap, AppInfo.WtLoginSdk.SubAppIdList)));
                     tlvs.PutTlv(new Tlv(0x0174, new T174Body(smsToken)));
                     tlvs.PutTlv(new Tlv(0x017c, new T17cBody(smsCode)));
                     tlvs.PutTlv(new Tlv(0x0198, new T198Body(0)));

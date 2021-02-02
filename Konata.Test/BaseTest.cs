@@ -1,13 +1,12 @@
-﻿using Konata.Utils;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System;
+
+using Konata.Utils;
 
 namespace Konata.Test
 {
     public class BaseTest
     {
-        public void Print_Bytes(params object[] args)
+        public void PrintBytes(params object[] args)
         {
             Console.Write($"[ .... ] ");
             {

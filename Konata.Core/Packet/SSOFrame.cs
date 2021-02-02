@@ -95,7 +95,7 @@ namespace Konata.Core.Packet
         {
             byte[] unknownBytes0 = { };
             byte[] unknownBytes1 = { };
-            string unknownString = $"||A{Default.ApkVersionName}.{Default.AppRevision}";
+            string unknownString = $"||A{AppInfo.ApkVersionName}.{AppInfo.AppRevision}";
             byte[] sessionBytes = ByteConverter.UInt32ToBytes(ssoFrame._session, Endian.Big);
 
             var write = new PacketBase();
@@ -105,8 +105,8 @@ namespace Konata.Core.Packet
                     if (ssoFrame.PacketType == PacketType.TypeA)
                     {
                         write.PutIntBE(ssoFrame._sequence);
-                        write.PutUintBE(Default.SubAppId);
-                        write.PutUintBE(Default.SubAppId);
+                        write.PutUintBE(AppInfo.SubAppId);
+                        write.PutUintBE(AppInfo.SubAppId);
                         write.PutHexString("01 00 00 00 00 00 00 00 00 00 01 00");
 
                         write.PutBytes(ssoFrame._tgtoken ?? new byte[0],

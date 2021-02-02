@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Text;
 using System.Threading.Tasks;
-using Konata.Core.Entity;
-using Konata.Core.Event;
 
-namespace Konata.Core.Manager
+using Konata.Core.Entity;
+using Konata.Core.Event.EventModel;
+
+namespace Konata.Core.Component
 {
     [Component("BusinessComponent", "Konata Business Component")]
     public class BusinessComponent : BaseComponent

@@ -2,7 +2,7 @@
 using System.Net.Sockets;
 using System.Net.NetworkInformation;
 
-namespace Konata.Core.Manager
+namespace Konata.Core.Component
 {
     [Component("SocketComponent", "Konata Socket Client Component")]
     public class SocketComponent : BaseComponent

@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-using Konata.Core.Event;
+using Konata.Core.Event.EventModel;
 using Konata.Core.Entity;
-using Konata.Core.Manager;
+using Konata.Core.Component;
 
 namespace Konata.Core
 {

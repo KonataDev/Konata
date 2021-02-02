@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace Konata.Core
+namespace Konata.Core.Packet
 {
-    internal class Default
+    internal static class AppInfo
     {
         public static uint AppId { get; } = 16;
 

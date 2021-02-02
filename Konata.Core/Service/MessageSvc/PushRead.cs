@@ -5,8 +5,8 @@ using Konata.Core.Event;
 
 namespace Konata.Core.Service.MessageSvc
 {
-    [SSOService("MessageSvc.PushReaded", "Push have been read this message")]
-    public class PushRead : ISSOService
+    [Service("MessageSvc.PushReaded", "Push have been read this message")]
+    public class PushRead : IService
     {
         public bool Parse(SSOFrame input, SignInfo signInfo, out ProtocolEvent output)
         {

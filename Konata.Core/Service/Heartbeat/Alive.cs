@@ -5,8 +5,8 @@ using Konata.Core.Packet;
 
 namespace Konata.Core.Service.Heartbeat
 {
-    [SSOService("Heartbeat.Alive", "Heartbeat for client")]
-    public class Alive : ISSOService
+    [Service("Heartbeat.Alive", "Heartbeat for client")]
+    public class Alive : IService
     {
         public bool Parse(SSOFrame input, SignInfo signInfo, out ProtocolEvent output)
         {

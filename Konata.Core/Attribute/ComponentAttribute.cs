@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Konata
+namespace Konata.Core
 {
     /// <summary>
     /// Konata Component Attribute

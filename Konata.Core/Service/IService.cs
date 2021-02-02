@@ -9,7 +9,7 @@ namespace Konata.Core.Service
     /// <summary>
     /// SSO Service interface
     /// </summary>
-    public interface ISSOService
+    public interface IService
     {
         /// <summary>
         /// Parse packet to protocol event

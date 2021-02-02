@@ -1,13 +1,14 @@
 ﻿using System;
 
 using Konata.Core.Event;
+using Konata.Core.Event.EventModel;
 using Konata.Core.Packet;
 using Konata.Utils.Protobuf;
 
 namespace Konata.Core.Service.OnlinePush
 {
-    [SSOService("OnlinePush.PbPushGroupMsg", "Receive group message from server")]
-    public class PbPushGroupMsg : ISSOService
+    [Service("OnlinePush.PbPushGroupMsg", "Receive group message from server")]
+    public class PbPushGroupMsg : IService
     {
         public bool Parse(SSOFrame input, SignInfo signInfo, out ProtocolEvent output)
         {

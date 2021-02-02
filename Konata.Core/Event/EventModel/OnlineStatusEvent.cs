@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text;
 
-namespace Konata.Core.Event
+namespace Konata.Core.Event.EventModel
 {
     public class OnlineStatusEvent : ProtocolEvent
     {

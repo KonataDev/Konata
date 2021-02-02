@@ -1,14 +1,15 @@
 ﻿using System;
 
 using Konata.Core.Event;
+using Konata.Core.Event.EventModel;
 using Konata.Core.Packet;
 using Konata.Core.Packet.Oidb.OidbModel;
 
 namespace Konata.Core.Service.OidbSvc
 {
-    [SSOService("OidbSvc.0x570_8", "Mute member in the group")]
+    [Service("OidbSvc.0x570_8", "Mute member in the group")]
     [Event(typeof(GroupMuteMemberEvent))]
-    public class Oidb0x570_8 : ISSOService
+    public class Oidb0x570_8 : IService
     {
         public bool Parse(SSOFrame input, SignInfo signInfo, out ProtocolEvent output)
         {

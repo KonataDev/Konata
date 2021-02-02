@@ -1,11 +1,18 @@
 ﻿using System;
 using System.Linq;
 using System.Text;
-using Konata.Core.Types;
+
 using Konata.Utils.Crypto;
 
 namespace Konata.Core
 {
+    public enum NetworkType
+    {
+        Other = 0,
+        Mobile = 1,
+        Wifi = 2,
+    }
+
     public static class DeviceInfo
     {
         public static byte[] Guid
@@ -184,9 +191,6 @@ namespace Konata.Core
                         return "CTNET"; // CTNET / CTWAP / CTIMS
                     }
                 }
-
-
-
             }
 
         }
@@ -201,26 +205,6 @@ namespace Konata.Core
             public static int Height
             {
                 get => 896;
-            }
-        }
-
-        public static class Browser
-        {
-            public static string UserAgent
-            {
-                get
-                {
-                    return $"Mozilla/5.0 (Linux; Android {System.OsVersion}; {System.ModelName} Build/OPM2.171026.006.H1; wv) " +
-                     "AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/77.0.3865.120 " +
-                     "MQQBrowser/6.2 TBS/045328 Mobile " +
-                     $"QQ/{Default.AppBuildVer} " +
-                     $"Safari/537.36 V1_AND_SQ_{Default.ApkVersionName}_1328_YYB_D " +
-                     "NetType/WIFI " +
-                     "WebP/0.3.0 " +
-                     $"Pixel/{Display.Width} " +
-                     "StatusBarHeight/132 " +
-                     "SimpleUISwitch/0";
-                }
             }
         }
     }

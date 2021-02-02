@@ -5,8 +5,8 @@ using Konata.Core.Event;
 
 namespace Konata.Core.Service.MessageSvc
 {
-    [SSOService("MessageSvc.PushNotify", "Push notify on received a private message")]
-    public class PushNotify : ISSOService
+    [Service("MessageSvc.PushNotify", "Push notify on received a private message")]
+    public class PushNotify : IService
     {
         public bool Parse(SSOFrame input, SignInfo signInfo, out ProtocolEvent output)
         {

@@ -1,17 +1,17 @@
 ﻿using System;
 
-namespace Konata
+namespace Konata.Core
 {
     /// <summary>
     /// SSO Service Attribute
     /// </summary>
-    public class SSOServiceAttribute : Attribute
+    public class ServiceAttribute : Attribute
     {
         public string ServiceName { get; set; }
 
         public string Description { get; set; }
 
-        public SSOServiceAttribute(string name, string description)
+        public ServiceAttribute(string name, string description)
         {
             ServiceName = name;
             Description = description;

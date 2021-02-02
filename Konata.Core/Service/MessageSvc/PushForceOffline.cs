@@ -5,8 +5,8 @@ using Konata.Core.Packet;
 
 namespace Konata.Core.Service.MessageSvc
 {
-    [SSOService("MessageSvc.PushForceOffline", "Force offline")]
-    public class PushForceOffline : ISSOService
+    [Service("MessageSvc.PushForceOffline", "Force offline")]
+    public class PushForceOffline : IService
     {
         public bool Parse(SSOFrame input, SignInfo signInfo, out ProtocolEvent output)
         {

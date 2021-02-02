@@ -5,8 +5,8 @@ using Konata.Core.Packet;
 
 namespace Konata.Core.Service.MessageSvc
 {
-    [SSOService("MessageSvc.PbGetMsg", "Get message")]
-    public class PbGetMsg : ISSOService
+    [Service("MessageSvc.PbGetMsg", "Get message")]
+    public class PbGetMsg : IService
     {
         public bool Parse(SSOFrame input, SignInfo signInfo, out ProtocolEvent output)
         {

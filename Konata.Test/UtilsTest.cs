@@ -1,33 +1,11 @@
 ﻿using System;
-using System.IO;
 using NUnit.Framework;
-using Microsoft.Extensions.Configuration;
 
-using Konata.Utils;
 using Konata.Utils.IO;
 using Konata.Utils.Protobuf;
 
 namespace Konata.Test
 {
-    public enum TestEnum
-    {
-        test1 = 1,
-        test2 = 2
-    }
-
-    public class TestModel
-    {
-        public string test { get; set; }
-
-        private string ptest { get; set; }
-
-        public int itest { get; set; }
-
-        public float ftest { get; set; }
-
-        public TestEnum enumtest { get; set; } = TestEnum.test2;
-    }
-
     [TestFixture(Description = "工具类组件测试")]
     public class UtilsTest : BaseTest
     {
@@ -39,7 +17,7 @@ namespace Konata.Test
 
         [Test]
         [Category("byte缓存字节测试")]
-        public void ByteBuffer_Function()
+        public void ByteBufferFunction()
         {
             var buffer = new ByteBuffer();
 
@@ -58,7 +36,7 @@ namespace Konata.Test
 
         [Test]
         [Category("proto树结构展示")]
-        public void Proto_Tree_Function()
+        public void ProtoTreeFunction()
         {
             var root = new ProtoTreeRoot();
             {
@@ -74,25 +52,8 @@ namespace Konata.Test
                 });
             }
 
-            Print_Bytes(root.Serialize().GetBytes());
+            PrintBytes(root.Serialize().GetBytes());
             Assert.Pass();
-        }
-
-        [Test]
-        [Category("配置文件装载")]
-        public void Load_Config()
-        {
-            var config = ConfigurationReader.LoadConfig
-                (basepath: Directory.GetCurrentDirectory(), reloadOnChange: true);
-
-            Console.WriteLine(ConfigurationReader.CurrentPath);
-            Console.WriteLine(Directory.GetCurrentDirectory());
-
-            TestModel testModel = new TestModel();
-            config.Bind("testbind", testModel);
-
-            Assert.AreEqual("test", config["test"]);
-            Assert.AreEqual(TestEnum.test1, testModel.enumtest);
         }
     }
 }

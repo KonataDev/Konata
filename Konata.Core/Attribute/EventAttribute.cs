@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Text;
 
-using Konata.Core.Event;
-
-namespace Konata
+namespace Konata.Core
 {
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
     public class EventAttribute : Attribute

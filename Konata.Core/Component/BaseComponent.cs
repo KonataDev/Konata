@@ -6,7 +6,7 @@ using System.Threading.Tasks.Dataflow;
 using Konata.Core.Event;
 using Konata.Core.Entity;
 
-namespace Konata.Core.Manager
+namespace Konata.Core.Component
 {
     public class BaseComponent
     {

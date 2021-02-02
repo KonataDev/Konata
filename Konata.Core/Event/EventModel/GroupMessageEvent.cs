@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Konata.Core.Event
+namespace Konata.Core.Event.EventModel
 {
     public class GroupMessageEvent : ProtocolEvent
     {

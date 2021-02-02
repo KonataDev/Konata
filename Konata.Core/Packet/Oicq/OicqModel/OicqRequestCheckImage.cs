@@ -31,8 +31,8 @@ namespace Konata.Core.Packet.Oicq
                     tlvs.PutTlv(new Tlv(0x0193, new T193Body(sigTicket)));
                     tlvs.PutTlv(new Tlv(0x0008, new T8Body()));
                     tlvs.PutTlv(new Tlv(0x0104, new T104Body(sigSission)));
-                    tlvs.PutTlv(new Tlv(0x0116, new T116Body(Default.WtLoginSdk.MiscBitmap,
-                        Default.WtLoginSdk.SubSigBitmap, Default.WtLoginSdk.SubAppIdList)));
+                    tlvs.PutTlv(new Tlv(0x0116, new T116Body(AppInfo.WtLoginSdk.MiscBitmap,
+                        AppInfo.WtLoginSdk.SubSigBitmap, AppInfo.WtLoginSdk.SubAppIdList)));
                 }
 
                 PutUshortBE(OicqSubCommand);
