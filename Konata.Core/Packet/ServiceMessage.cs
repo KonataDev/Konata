@@ -112,11 +112,12 @@ namespace Konata.Core.Packet
                     break;
             }
 
+
             //TODO:
             //IsServerResponse?
             //output.IsServerResponse = true;
 
-            return true;
+            return output._payloadData != null;
         }
 
         public static bool Create(SSOFrame ssoFrame, AuthFlag reqFlag, uint reqUin,

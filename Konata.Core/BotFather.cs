@@ -2,7 +2,7 @@
 using System.Text;
 using System.Threading.Tasks.Dataflow;
 
-using Konata.Core.Utils;
+using Konata.Utils;
 using Konata.Core.Event;
 using Konata.Core.Component;
 

@@ -1,12 +1,17 @@
 ﻿using System;
-using System.Text;
 
 namespace Konata.Core.Event
 {
     public class BaseEvent
     {
-        public ulong EventTime { get; set; }
+        public DateTime EventTime { get; set; }
 
         public string EventMessage { get; set; }
+
+        public BaseEvent()
+        {
+            EventTime = DateTime.Now;
+            EventMessage = "";
+        }
     }
 }

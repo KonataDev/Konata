@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
 
-using Konata.Core.Utils;
+using Konata.Utils;
 using Konata.Core.Event;
 using Konata.Core.Entity;
 using Konata.Core.Service;
@@ -64,13 +64,13 @@ namespace Konata.Core.Component
                     // Bind protocol event type with service
                     foreach (var attr in eventAttrs)
                     {
-                        _servicesEventType[attr.GetType()].Add(service);
+                        _servicesEventType[attr.Event].Add(service);
                     }
                 }
             }
         }
 
-        public override void EventHandler(KonataTask task)
+        internal override void EventHandler(KonataTask task)
         {
             var config = GetComponent<ConfigComponent>();
 

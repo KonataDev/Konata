@@ -11,9 +11,13 @@ namespace Konata.Core.Component
     public class BaseComponent
     {
         public BaseEntity Entity { get; set; }
-        public ActionBlock<KonataTask> EventPipeline { get; set; }
 
-        public virtual void EventHandler(KonataTask task) { }
+        internal ActionBlock<KonataTask> EventPipeline { get; set; }
+
+        internal BaseComponent()
+            => EventPipeline = new ActionBlock<KonataTask>(EventHandler);
+
+        internal virtual void EventHandler(KonataTask task) { }
 
         protected void PostEventToEntity(BaseEvent anyEvent)
             => Entity.PostEventToEntity(anyEvent);

@@ -2,7 +2,7 @@
 using System.Reflection;
 using System.Collections.Generic;
 
-namespace Konata.Core.Utils
+namespace Konata.Utils
 {
     public static class Reflection
     {

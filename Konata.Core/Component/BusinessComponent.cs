@@ -63,6 +63,7 @@ namespace Konata.Core.Component
                 case WtLoginEvent.Type.CheckSMS:
                     return await RefreshSMSCode();
                 case WtLoginEvent.Type.CheckSlider:
+                    PostEventToEntity(wtEvent);
                     return false;
                 case WtLoginEvent.Type.CheckDevLock:
                     return await ValidateDeviceLock();
@@ -88,7 +89,7 @@ namespace Konata.Core.Component
                     ToggleType = toggleAdmin
                 });
 
-        public override void EventHandler(KonataTask task)
+        internal override void EventHandler(KonataTask task)
         {
             if (task.EventPayload is WtLoginEvent wtloginEvent)
             {

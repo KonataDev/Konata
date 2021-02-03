@@ -8,10 +8,11 @@ namespace Konata.Core
 
         public string Password { get; set; }
 
-        public bool UseIPv6Connection { get; set; } = false;
+        public bool UseIPv6Connection { get; set; }
 
-        public bool ReConnectWhileLinkDown { get; set; } = true;
+        public bool ReConnectWhileLinkDown { get; set; }
 
-        public uint ReConnectTryCount { get; set; } = 3;
+        public uint ReConnectTryCount { get; set; }
+
     }
 }

@@ -2,7 +2,7 @@
 
 namespace Konata.Core.Event.EventModel
 {
-    public class GroupKickMembersEvent : BaseEvent
+    public class GroupKickMembersEvent : ProtocolEvent
     {
         public uint GroupUin { get; set; }
 

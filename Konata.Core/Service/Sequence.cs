@@ -26,7 +26,7 @@ namespace Konata.Core.Service
 
         public Sequence()
         {
-            _globalSequence = 10000;
+            _globalSequence = 25900;
             _sessionSequence = new ConcurrentDictionary<string, int>();
         }
 

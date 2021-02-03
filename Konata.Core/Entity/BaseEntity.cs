@@ -15,7 +15,7 @@ namespace Konata.Core.Entity
         private Dictionary<Type, BaseComponent> _componentDict
             = new Dictionary<Type, BaseComponent>();
 
-        public void SetEventHandler(ActionBlock<BaseEvent> handler)
+        internal void SetEventHandler(ActionBlock<BaseEvent> handler)
             => _eventHandler = handler;
 
         /// <summary>
@@ -23,7 +23,7 @@ namespace Konata.Core.Entity
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public T GetComponent<T>()
+        internal T GetComponent<T>()
             where T : BaseComponent
         {
             if (!_componentDict.TryGetValue(typeof(T), out BaseComponent component))
@@ -37,7 +37,7 @@ namespace Konata.Core.Entity
         /// Add component to this entity
         /// </summary>
         /// <param name="component"></param>
-        public void AddComponent(BaseComponent component)
+        internal void AddComponent(BaseComponent component)
         {
             if (_componentDict.TryGetValue(component.GetType(), out var _))
             {
@@ -53,7 +53,7 @@ namespace Konata.Core.Entity
         /// Delete component
         /// </summary>
         /// <param name="type"></param>
-        public void RemoveComponent(Type type)
+        internal void RemoveComponent(Type type)
         {
             if (!_componentDict.TryGetValue(type, out BaseComponent component))
             {
@@ -67,7 +67,7 @@ namespace Konata.Core.Entity
         /// Post an event to entity
         /// </summary>
         /// <param name="anyEvent"></param>
-        public void PostEventToEntity(BaseEvent anyEvent)
+        internal void PostEventToEntity(BaseEvent anyEvent)
             => _eventHandler.SendAsync(anyEvent);
 
         /// <summary>
@@ -76,7 +76,7 @@ namespace Konata.Core.Entity
         /// <typeparam name="T"></typeparam>
         /// <param name="anyEvent"></param>
         /// <returns></returns>
-        public Task<BaseEvent> PostEvent<T>(BaseEvent anyEvent)
+        internal Task<BaseEvent> PostEvent<T>(BaseEvent anyEvent)
             where T : BaseComponent
         {
             var task = new KonataTask(anyEvent);
@@ -91,7 +91,7 @@ namespace Konata.Core.Entity
         /// Broad an event to all components
         /// </summary>
         /// <param name="anyEvent"></param>
-        public void BroadcastEvent(BaseEvent anyEvent)
+        internal void BroadcastEvent(BaseEvent anyEvent)
         {
             foreach (var component in _componentDict)
             {
@@ -99,7 +99,7 @@ namespace Konata.Core.Entity
             }
         }
 
-        public static Task RunAsync(Action action)
+        private static Task RunAsync(Action action)
         {
             var taskSource = new TaskCompletionSource<Object>();
 
@@ -120,7 +120,7 @@ namespace Konata.Core.Entity
         }
     }
 
-    public class KonataTask
+    internal class KonataTask
     {
         public BaseEvent EventPayload { get; }
 

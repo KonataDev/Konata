@@ -9,6 +9,8 @@ namespace Konata.Core
 {
     public class Bot : BaseEntity
     {
+        internal Bot() { }
+
         /// <summary>
         /// Login
         /// </summary>

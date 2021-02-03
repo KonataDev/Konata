@@ -3,12 +3,19 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30204.135
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Konata.Utils", "Konata.Utils\Konata.Utils.csproj", "{2A4C97AB-52AC-45DC-A203-2B15CD710E5C}"
+
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Konata", "Konata\Konata.csproj", "{78C04892-952B-47C0-A878-894CE70A34FC}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Konata.Test", "Konata.Test\Konata.Test.csproj", "{9A51B735-D9F4-4043-A802-03F9FE0548F4}"
-EndProject
+
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Konata.Core", "Konata.Core\Konata.Core.csproj", "{C06DDAF5-43DC-439F-AF6A-BB1FCB191987}"
 EndProject
+
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Konata.Utils", "Konata.Utils\Konata.Utils.csproj", "{2A4C97AB-52AC-45DC-A203-2B15CD710E5C}"
+EndProject
+
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Konata.Test", "Konata.Test\Konata.Test.csproj", "{9A51B735-D9F4-4043-A802-03F9FE0548F4}"
+EndProject
+
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{BFDA5A63-B0A7-4C9C-AEBD-4F462208100A}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
@@ -16,6 +23,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
+
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Blueprint", "Blueprint", "{4FA698FA-02D0-4749-BA5F-18D919A9887B}"
 	ProjectSection(SolutionItems) = preProject
 		Blueprint\konata.framework.svg = Blueprint\konata.framework.svg
@@ -25,6 +33,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Blueprint", "Blueprint", "{
 		Blueprint\wtlogin.login.svg = Blueprint\wtlogin.login.svg
 	EndProjectSection
 EndProject
+
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -43,6 +52,10 @@ Global
 		{C06DDAF5-43DC-439F-AF6A-BB1FCB191987}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C06DDAF5-43DC-439F-AF6A-BB1FCB191987}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C06DDAF5-43DC-439F-AF6A-BB1FCB191987}.Release|Any CPU.Build.0 = Release|Any CPU
+		{78C04892-952B-47C0-A878-894CE70A34FC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{78C04892-952B-47C0-A878-894CE70A34FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{78C04892-952B-47C0-A878-894CE70A34FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{78C04892-952B-47C0-A878-894CE70A34FC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

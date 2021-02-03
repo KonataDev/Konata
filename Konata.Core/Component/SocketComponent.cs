@@ -99,7 +99,8 @@ namespace Konata.Core.Component
         {
             try
             {
-                _socket.BeginConnect(hostIp, port, BeginConnect, null);
+                _socket.BeginConnect(hostIp, port, BeginConnect, null)
+                    .AsyncWaitHandle.WaitOne();
             }
             catch (Exception e)
             {
@@ -156,9 +157,9 @@ namespace Konata.Core.Component
                         _recvLength = 0;
                         _recvStatus = ReceiveStatus.Idle;
 
-                        var packet = new byte[_recvBuffer.Length];
+                        var packet = new byte[_packetLength - 4];
                         {
-                            _recvBuffer.CopyTo(packet, 0);
+                            Array.Copy(_recvBuffer, 4, packet, 0, packet.Length);
                             OnReceivePacket(packet);
                         }
                     }
@@ -197,17 +198,22 @@ namespace Konata.Core.Component
         /// </summary>
         /// <param name="buffer"></param>
         private void OnReceivePacket(byte[] buffer)
-            => PostEvent<PacketComponent>(new PacketEvent
+        {
+            LogV(TAG, $"Recv data => \n{Hex.Bytes2HexStr(buffer)}");
+
+            PostEvent<PacketComponent>(new PacketEvent
             {
-                Buffer = buffer
+                Buffer = buffer,
+                EventType = PacketEvent.Type.Receive
             });
+        }
 
         /// <summary>
         /// Send packet to server
         /// </summary>
-        /// <param name="data"><b>[In] </b>Data buffer to send</param>
+        /// <param name="buffer"><b>[In] </b>Data buffer to send</param>
         /// <returns></returns>
-        public Task<bool> SendData(byte[] data)
+        public Task<bool> SendData(byte[] buffer)
         {
             if (!_socket.Connected)
             {
@@ -217,7 +223,8 @@ namespace Konata.Core.Component
 
             try
             {
-                _socket.BeginSend(data, 0, data.Length, SocketFlags.None, BeginSendData, null);
+                LogV(TAG, $"Send data => \n{Hex.Bytes2HexStr(buffer)}");
+                _socket.BeginSend(buffer, 0, buffer.Length, SocketFlags.None, BeginSendData, null);
             }
             catch (Exception e)
             {
@@ -241,6 +248,7 @@ namespace Konata.Core.Component
             }
 
             _socket.Close();
+            _recvStatus = ReceiveStatus.Stop;
 
             PostEvent<BusinessComponent>(new OnlineStatusEvent
             {
@@ -251,7 +259,7 @@ namespace Konata.Core.Component
             return Task.FromResult(true);
         }
 
-        public override void EventHandler(KonataTask task)
+        internal override void EventHandler(KonataTask task)
         {
             if (task.EventPayload is PacketEvent packetEvent)
             {
