@@ -40,30 +40,29 @@ namespace Konata.Core.Packet
 
         public static bool Build(ServiceMessage toService, out byte[] output)
         {
+            var body = new PacketBase();
             var write = new PacketBase();
             {
-                write.EnterBarrier(ByteBuffer.Prefix.Uint32, Endian.Big);
-                {
-                    write.PutUintBE((uint)toService.Frame.PacketType);
-                    write.PutByte((byte)toService._authFlag);
+                body.PutUintBE((uint)toService.Frame.PacketType);
+                body.PutByte((byte)toService._authFlag);
 
-                    write.PutBytes(toService._headExtra,
-                       toService.Frame.PacketType == PacketType.TypeA ?
-                       ByteBuffer.Prefix.Uint32 | ByteBuffer.Prefix.WithPrefix : ByteBuffer.Prefix.None);
+                body.PutBytes(toService._headExtra,
+                   toService.Frame.PacketType == PacketType.TypeA ?
+                   ByteBuffer.Prefix.Uint32 | ByteBuffer.Prefix.WithPrefix : ByteBuffer.Prefix.None);
 
-                    write.PutByte(0x00);
+                body.PutByte(0x00);
 
-                    write.PutString(toService._headUin,
-                        ByteBuffer.Prefix.Uint32 | ByteBuffer.Prefix.WithPrefix);
+                body.PutString(toService._headUin,
+                    ByteBuffer.Prefix.Uint32 | ByteBuffer.Prefix.WithPrefix);
 
-                    if (toService._keyData == null)
-                        write.PutByteBuffer(SSOFrame.Build(toService._payloadFrame));
-                    else
-                        write.PutEncryptedBytes(SSOFrame.Build(toService._payloadFrame).GetBytes(),
-                        TeaCryptor.Instance, toService._keyData);
-                }
-                write.LeaveBarrier();
+                if (toService._keyData == null)
+                    body.PutByteBuffer(SSOFrame.Build(toService._payloadFrame));
+                else
+                    body.PutEncryptedBytes(SSOFrame.Build(toService._payloadFrame).GetBytes(),
+                    TeaCryptor.Instance, toService._keyData);
             }
+            write.PutByteBuffer(body,
+                ByteBuffer.Prefix.Uint32 | ByteBuffer.Prefix.WithPrefix);
 
             output = write.GetBytes();
             return true;
