@@ -2,8 +2,9 @@
 using System.Text;
 using System.Threading.Tasks;
 
-using Konata.Core.Entity;
+using Konata.Core.Event;
 using Konata.Core.Event.EventModel;
+using Konata.Core.Entity;
 
 namespace Konata.Core.Component
 {
@@ -13,6 +14,7 @@ namespace Konata.Core.Component
         public string TAG = "BusinessComponent";
 
         private OnlineStatusEvent.Type _onlineType;
+        private TaskCompletionSource<WtLoginEvent> _pendingUserOperation;
 
         public BusinessComponent()
         {
@@ -28,47 +30,81 @@ namespace Konata.Core.Component
                     return false;
                 }
 
-                var result = await PostEvent<PacketComponent>
-                     (new WtLoginEvent { EventType = WtLoginEvent.Type.Tgtgt });
+                var wtStatus = await WtLogin();
+                {
+                    while (wtStatus == null || wtStatus.EventType != WtLoginEvent.Type.OK)
+                    {
+                        switch (wtStatus.EventType)
+                        {
+                            case WtLoginEvent.Type.OK:
+                                return true;
 
-                return await LoginLogic((WtLoginEvent)result);
+                            case WtLoginEvent.Type.CheckSMS:
+                            case WtLoginEvent.Type.CheckSlider:
+                                PostEventToEntity(wtStatus);
+                                wtStatus = await WtCheckUserOperation();
+                                break;
+
+                            case WtLoginEvent.Type.RefreshSMS:
+                                wtStatus = await WtRefreshSMSCode();
+                                break;
+
+                            case WtLoginEvent.Type.CheckDevLock:
+                            //wtStatus = await WtValidateDeviceLock();
+                            //break;
+
+                            case WtLoginEvent.Type.LoginDenied:
+                            case WtLoginEvent.Type.InvalidSmsCode:
+                            case WtLoginEvent.Type.InvalidLoginEnvironment:
+                            case WtLoginEvent.Type.InvalidUinOrPassword:
+                                PostEventToEntity(wtStatus);
+                                return false;
+
+                            default:
+                            case WtLoginEvent.Type.NotImplemented:
+                                LogW(TAG, "Login fail. Unsupported wtlogin event type received.");
+                                return false;
+                        }
+                    }
+                }
+
+                LogW(TAG, "You goes here? What the happend?");
+                return false;
             }
 
             LogW(TAG, "Calling Login method again while online.");
             return false;
         }
 
-        public async Task<bool> RefreshSMSCode()
-        => await LoginLogic((WtLoginEvent)await PostEvent<PacketComponent>
-                (new WtLoginEvent { EventType = WtLoginEvent.Type.RefreshSMS }));
+        public async void SubmitSMSCode(string code)
+            => _pendingUserOperation.SetResult(new WtLoginEvent
+            { EventType = WtLoginEvent.Type.CheckSMS, CaptchaResult = code });
 
-        public async Task<bool> SubmitSMSCode(string code)
-            => await LoginLogic((WtLoginEvent)await PostEvent<PacketComponent>
-                (new WtLoginEvent { EventType = WtLoginEvent.Type.CheckSMS, CaptchaResult = code }));
+        public async void SubmitSliderTicket(string ticket)
+            => _pendingUserOperation.SetResult(new WtLoginEvent
+            { EventType = WtLoginEvent.Type.CheckSlider, CaptchaResult = ticket });
 
-        public async Task<bool> SubmitSliderTicket(string ticket)
-            => await LoginLogic((WtLoginEvent)await PostEvent<PacketComponent>
-                (new WtLoginEvent { EventType = WtLoginEvent.Type.CheckSlider, CaptchaResult = ticket }));
+        internal async Task<WtLoginEvent> WtLogin()
+            => (WtLoginEvent)await PostEvent<PacketComponent>
+            (new WtLoginEvent { EventType = WtLoginEvent.Type.Tgtgt });
 
-        public async Task<bool> ValidateDeviceLock()
-            => await LoginLogic((WtLoginEvent)await PostEvent<PacketComponent>
-                (new WtLoginEvent { EventType = WtLoginEvent.Type.CheckDevLock }));
+        internal async Task<WtLoginEvent> WtRefreshSMSCode()
+            => (WtLoginEvent)await PostEvent<PacketComponent>
+            (new WtLoginEvent { EventType = WtLoginEvent.Type.RefreshSMS });
 
-        private async Task<bool> LoginLogic(WtLoginEvent wtEvent)
+        internal async Task<WtLoginEvent> WtValidateDeviceLock()
+            => (WtLoginEvent)await PostEvent<PacketComponent>
+            (new WtLoginEvent { EventType = WtLoginEvent.Type.CheckDevLock });
+
+        internal async Task<WtLoginEvent> WtCheckUserOperation()
+            => (WtLoginEvent)await PostEvent<PacketComponent>
+            (await WaitForUserOperation());
+
+        private async Task<WtLoginEvent> WaitForUserOperation()
         {
-            switch (wtEvent.EventType)
-            {
-                case WtLoginEvent.Type.OK:
-                    return true;
-                case WtLoginEvent.Type.CheckSMS:
-                    return await RefreshSMSCode();
-                case WtLoginEvent.Type.CheckSlider:
-                    PostEventToEntity(wtEvent);
-                    return false;
-                case WtLoginEvent.Type.CheckDevLock:
-                    return await ValidateDeviceLock();
-                default: return false;
-            }
+            // _pendingUserOperation?.SetCanceled();
+            _pendingUserOperation = new TaskCompletionSource<WtLoginEvent>();
+            return await _pendingUserOperation.Task;
         }
 
         public async Task<GroupKickMemberEvent> GroupKickMember(uint groupUin, uint memberUin, bool preventRequest)
@@ -91,12 +127,7 @@ namespace Konata.Core.Component
 
         internal override void EventHandler(KonataTask task)
         {
-            if (task.EventPayload is WtLoginEvent wtloginEvent)
-            {
-                LoginLogic(wtloginEvent).Wait();
-            }
-
-            else if (task.EventPayload is OnlineStatusEvent onlineStatusEvent)
+            if (task.EventPayload is OnlineStatusEvent onlineStatusEvent)
             {
                 _onlineType = onlineStatusEvent.EventType;
             }
