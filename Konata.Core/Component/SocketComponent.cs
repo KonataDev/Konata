@@ -7,6 +7,7 @@ using Konata.Utils;
 using Konata.Core.Event;
 using Konata.Core.Event.EventModel;
 using Konata.Core.Entity;
+using System.Threading;
 
 namespace Konata.Core.Component
 {
@@ -141,11 +142,15 @@ namespace Konata.Core.Component
 
                 if (_recvStatus == ReceiveStatus.Idle)
                 {
-                    if (_recvLength < 4) return;
+                    if (_recvLength < 4)
+                    {
+                        Thread.Sleep(10);
+                        return;
+                    }
 
                     _packetLength = BitConverter.ToInt32(_recvBuffer.Take(4).Reverse().ToArray(), 0);
-                    if (_recvBuffer.Length < _packetLength)
-                        Array.Resize(ref _recvBuffer, _packetLength);
+                    //if (_recvBuffer.Length < _packetLength)
+                    Array.Resize(ref _recvBuffer, _packetLength);
 
                     _recvStatus = ReceiveStatus.RecvBody;
                 }
@@ -157,11 +162,7 @@ namespace Konata.Core.Component
                         _recvLength = 0;
                         _recvStatus = ReceiveStatus.Idle;
 
-                        var packet = new byte[_packetLength - 4];
-                        {
-                            Array.Copy(_recvBuffer, 4, packet, 0, packet.Length);
-                            OnReceivePacket(packet);
-                        }
+                        OnReceivePacket(_recvBuffer, _packetLength);
                     }
                 }
             }
@@ -197,15 +198,19 @@ namespace Konata.Core.Component
         /// On Received a packet 
         /// </summary>
         /// <param name="buffer"></param>
-        private void OnReceivePacket(byte[] buffer)
+        private void OnReceivePacket(byte[] buffer, int length)
         {
-            LogV(TAG, $"Recv data => \n{Hex.Bytes2HexStr(buffer)}");
-
-            PostEvent<PacketComponent>(new PacketEvent
+            var packet = new byte[length];
             {
-                Buffer = buffer,
-                EventType = PacketEvent.Type.Receive
-            });
+                Array.Copy(buffer, 0, packet, 0, length);
+                PostEvent<PacketComponent>(new PacketEvent
+                {
+                    Buffer = buffer,
+                    EventType = PacketEvent.Type.Receive
+                });
+
+                LogV(TAG, $"Recv data => { Hex.Bytes2HexStr(packet) }");
+            }
         }
 
         /// <summary>
