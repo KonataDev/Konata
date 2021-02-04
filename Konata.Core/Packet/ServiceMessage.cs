@@ -42,23 +42,27 @@ namespace Konata.Core.Packet
         {
             var write = new PacketBase();
             {
-                write.PutUintBE((uint)toService.Frame.PacketType);
-                write.PutByte((byte)toService._authFlag);
+                write.EnterBarrier(ByteBuffer.Prefix.Uint32, Endian.Big);
+                {
+                    write.PutUintBE((uint)toService.Frame.PacketType);
+                    write.PutByte((byte)toService._authFlag);
 
-                write.PutBytes(toService._headExtra,
-                   toService.Frame.PacketType == PacketType.TypeA ?
-                   ByteBuffer.Prefix.Uint32 | ByteBuffer.Prefix.WithPrefix : ByteBuffer.Prefix.None);
+                    write.PutBytes(toService._headExtra,
+                       toService.Frame.PacketType == PacketType.TypeA ?
+                       ByteBuffer.Prefix.Uint32 | ByteBuffer.Prefix.WithPrefix : ByteBuffer.Prefix.None);
 
-                write.PutByte(0x00);
+                    write.PutByte(0x00);
 
-                write.PutString(toService._headUin,
-                    ByteBuffer.Prefix.Uint32 | ByteBuffer.Prefix.WithPrefix);
+                    write.PutString(toService._headUin,
+                        ByteBuffer.Prefix.Uint32 | ByteBuffer.Prefix.WithPrefix);
 
-                if (toService._keyData == null)
-                    write.PutByteBuffer(SSOFrame.Build(toService._payloadFrame));
-                else
-                    write.PutEncryptedBytes(SSOFrame.Build(toService._payloadFrame).GetBytes(),
-                    TeaCryptor.Instance, toService._keyData);
+                    if (toService._keyData == null)
+                        write.PutByteBuffer(SSOFrame.Build(toService._payloadFrame));
+                    else
+                        write.PutEncryptedBytes(SSOFrame.Build(toService._payloadFrame).GetBytes(),
+                        TeaCryptor.Instance, toService._keyData);
+                }
+                write.LeaveBarrier();
             }
 
             output = write.GetBytes();
@@ -74,6 +78,10 @@ namespace Konata.Core.Packet
 
             var read = new PacketBase(buffer);
             {
+                // Packet Length
+                read.EatBytes(4);
+
+                // Packet Type
                 read.TakeUintBE(out var pktType);
                 {
                     if (pktType != 0x0A && pktType != 0x0B)
@@ -82,6 +90,7 @@ namespace Konata.Core.Packet
                     output._packetType = (PacketType)pktType;
                 }
 
+                // Auth Flag
                 read.TakeByte(out var reqFlag);
                 {
                     if (reqFlag != 0x00 && reqFlag != 0x01 && reqFlag != 0x02)
@@ -89,12 +98,14 @@ namespace Konata.Core.Packet
                     output._authFlag = (AuthFlag)reqFlag;
                 }
 
+                // Fixed zero
                 read.TakeByte(out var zeroByte);
                 {
                     if (zeroByte != 0x00)
                         return false;
                 }
 
+                // Uin
                 read.TakeString(out output._headUin,
                     ByteBuffer.Prefix.Uint32 | ByteBuffer.Prefix.WithPrefix);
             }

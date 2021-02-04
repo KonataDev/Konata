@@ -99,54 +99,53 @@ namespace Konata.Core.Packet
             byte[] sessionBytes = ByteConverter.UInt32ToBytes(ssoFrame._session, Endian.Big);
 
             var write = new PacketBase();
+            var head = new PacketBase();
             {
-                write.EnterBarrier(ByteBuffer.Prefix.Uint32 | ByteBuffer.Prefix.WithPrefix, Endian.Big);
+                if (ssoFrame.PacketType == PacketType.TypeA)
                 {
-                    if (ssoFrame.PacketType == PacketType.TypeA)
-                    {
-                        write.PutIntBE(ssoFrame._sequence);
-                        write.PutUintBE(AppInfo.SubAppId);
-                        write.PutUintBE(AppInfo.SubAppId);
-                        write.PutHexString("01 00 00 00 00 00 00 00 00 00 01 00");
+                    head.PutIntBE(ssoFrame._sequence);
+                    head.PutUintBE(AppInfo.SubAppId);
+                    head.PutUintBE(AppInfo.SubAppId);
+                    head.PutHexString("01 00 00 00 00 00 00 00 00 00 01 00");
 
-                        write.PutBytes(ssoFrame._tgtoken ?? new byte[0],
+                    head.PutBytes(ssoFrame._tgtoken ?? new byte[0],
                             ByteBuffer.Prefix.Uint32 | ByteBuffer.Prefix.WithPrefix);
 
-                        write.PutString(ssoFrame._command,
+                    head.PutString(ssoFrame._command,
                             ByteBuffer.Prefix.Uint32 | ByteBuffer.Prefix.WithPrefix);
 
-                        write.PutBytes(sessionBytes,
+                    head.PutBytes(sessionBytes,
                             ByteBuffer.Prefix.Uint32 | ByteBuffer.Prefix.WithPrefix);
 
-                        write.PutString(DeviceInfo.System.Imei,
+                    head.PutString(DeviceInfo.System.Imei,
                             ByteBuffer.Prefix.Uint32 | ByteBuffer.Prefix.WithPrefix);
 
-                        write.PutBytes(unknownBytes0,
+                    head.PutBytes(unknownBytes0,
                             ByteBuffer.Prefix.Uint32 | ByteBuffer.Prefix.WithPrefix);
 
-                        write.PutString(unknownString,
+                    head.PutString(unknownString,
                             ByteBuffer.Prefix.Uint16 | ByteBuffer.Prefix.WithPrefix);
 
-                        write.PutBytes(unknownBytes1,
+                    head.PutBytes(unknownBytes1,
                             ByteBuffer.Prefix.Uint32 | ByteBuffer.Prefix.WithPrefix);
-                    }
-                    else if (ssoFrame.PacketType == PacketType.TypeB)
-                    {
-                        write.PutString(ssoFrame._command,
-                           ByteBuffer.Prefix.Uint32 | ByteBuffer.Prefix.WithPrefix);
-
-                        write.PutBytes(sessionBytes,
-                           ByteBuffer.Prefix.Uint32 | ByteBuffer.Prefix.WithPrefix);
-
-                        write.PutBytes(unknownBytes0,
-                           ByteBuffer.Prefix.Uint32 | ByteBuffer.Prefix.WithPrefix);
-                    }
                 }
-                write.LeaveBarrier();
+                else if (ssoFrame.PacketType == PacketType.TypeB)
+                {
+                    head.PutString(ssoFrame._command,
+                           ByteBuffer.Prefix.Uint32 | ByteBuffer.Prefix.WithPrefix);
 
-                write.PutByteBuffer(ssoFrame.Payload,
-                    ByteBuffer.Prefix.Uint32 | ByteBuffer.Prefix.WithPrefix);
+                    head.PutBytes(sessionBytes,
+                           ByteBuffer.Prefix.Uint32 | ByteBuffer.Prefix.WithPrefix);
+
+                    head.PutBytes(unknownBytes0,
+                           ByteBuffer.Prefix.Uint32 | ByteBuffer.Prefix.WithPrefix);
+                }
             }
+            write.PutByteBuffer(head,
+                    ByteBuffer.Prefix.WithPrefix | ByteBuffer.Prefix.Uint32);
+
+            write.PutByteBuffer(ssoFrame.Payload,
+                ByteBuffer.Prefix.Uint32 | ByteBuffer.Prefix.WithPrefix);
 
             return write;
         }
