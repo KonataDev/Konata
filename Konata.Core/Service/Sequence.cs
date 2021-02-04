@@ -8,6 +8,7 @@ namespace Konata.Core.Service
     {
         private int _globalSequence;
         private ConcurrentDictionary<string, int> _sessionSequence;
+        private uint _sessionCookie;
 
         /// <summary>
         /// Get sequence with auto increment
@@ -22,11 +23,13 @@ namespace Konata.Core.Service
         /// <summary>
         /// Get Session
         /// </summary>
-        public uint Session { get; set; }
+        public uint Session { get => _sessionCookie; set => _sessionCookie = value; }
 
         public Sequence()
         {
             _globalSequence = 25900;
+
+            _sessionCookie = 0x54B87ADC;
             _sessionSequence = new ConcurrentDictionary<string, int>();
         }
 

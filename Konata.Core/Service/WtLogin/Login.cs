@@ -159,7 +159,7 @@ namespace Konata.Core.Service.WtLogin
 
             return new WtLoginEvent
             {
-                EventType = WtLoginEvent.Type.NotImplemented,
+                EventType = WtLoginEvent.Type.CheckDevLock,
                 EventMessage = "DeviceLock not implemented. Please turn off your device lock and try again."
             };
         }
@@ -339,7 +339,7 @@ namespace Konata.Core.Service.WtLogin
             out int newSequece, out byte[] output)
         {
             output = null;
-            newSequece = sequence.NewSequence;
+            newSequece = sequence.GetSessionSequence("wtlogin.login");
 
             OicqRequest oicqRequest;
 

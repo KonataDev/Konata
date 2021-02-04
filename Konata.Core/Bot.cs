@@ -21,14 +21,14 @@ namespace Konata.Core
         /// Submit Slider ticket
         /// </summary>
         /// <param name="ticket"><b>[In]</b> Slider ticket</param>
-        public Task<bool> SubmitSliderTicket(string ticket)
+        public void SubmitSliderTicket(string ticket)
             => GetComponent<BusinessComponent>().SubmitSliderTicket(ticket);
 
         /// <summary>
         /// Submit SMS code.
         /// </summary>
         /// <param name="code"><b>[In]</b> SMS code</param>
-        public Task<bool> SubmitSMSCode(string code)
+        public void SubmitSMSCode(string code)
             => GetComponent<BusinessComponent>().SubmitSMSCode(code);
 
         /// <summary>
