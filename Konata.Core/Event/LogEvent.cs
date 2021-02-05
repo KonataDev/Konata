@@ -15,5 +15,7 @@ namespace Konata.Core.Event
     public class LogEvent : BaseEvent
     {
         public LogLevel Level { get; set; }
+
+        public string Tag { get; set; }
     }
 }
