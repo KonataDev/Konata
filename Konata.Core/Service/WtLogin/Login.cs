@@ -7,7 +7,7 @@ using Konata.Core.Packet.Tlv;
 using Konata.Core.Packet.Tlv.TlvModel;
 using Konata.Core.Packet.Oicq;
 
-using Konata.Utils;
+using Konata.Utils.IO;
 using Konata.Utils.Crypto;
 
 namespace Konata.Core.Service.WtLogin
@@ -31,7 +31,7 @@ namespace Konata.Core.Service.WtLogin
 
                 case OicqStatus.DoVerifySliderCaptcha:
                     output = OnRecvCheckSliderCaptcha(oicqRequest, signinfo); break;
-                case OicqStatus.DoVerifyDeviceLockViaSms:
+                case OicqStatus.DoVerifySms:
                     output = OnRecvCheckSmsCaptcha(oicqRequest, signinfo); break;
 
                 case OicqStatus.PreventByIncorrectUserOrPwd:
@@ -54,7 +54,7 @@ namespace Konata.Core.Service.WtLogin
 
         private ProtocolEvent OnRecvCheckSliderCaptcha(OicqRequest request, SignInfo signinfo)
         {
-            Console.WriteLine("Do slider verification.");
+            Console.WriteLine("  Do slider verification.");
 
             var tlvs = request.oicqRequestBody.TakeAllBytes(out var _);
             var unpacker = new TlvUnpacker(tlvs, true);
@@ -80,7 +80,7 @@ namespace Konata.Core.Service.WtLogin
 
         private ProtocolEvent OnRecvCheckSmsCaptcha(OicqRequest request, SignInfo signinfo)
         {
-            Console.WriteLine("Do sms verification.");
+            Console.WriteLine("  Do sms verification.");
 
             var tlvs = request.oicqRequestBody.TakeAllBytes(out var _);
             var unpacker = new TlvUnpacker(tlvs, true);
@@ -166,7 +166,7 @@ namespace Konata.Core.Service.WtLogin
 
         private ProtocolEvent OnRecvWtloginSuccess(OicqRequest request, SignInfo signinfo)
         {
-            Console.WriteLine("Wtlogin success.");
+            Console.WriteLine("  Wtlogin success.");
 
             var tlvs = request.oicqRequestBody.TakeAllBytes(out var _);
             var unpacker = new TlvUnpacker(tlvs, true);
@@ -231,13 +231,6 @@ namespace Konata.Core.Service.WtLogin
                     var userFace = ((T11aBody)tlv11a._tlvBody)._face;
                     var userNickname = ((T11aBody)tlv11a._tlvBody)._nickName;
 
-                    Console.WriteLine($"gtKey => {Hex.Bytes2HexStr(gtKey)}");
-                    Console.WriteLine($"stKey => {Hex.Bytes2HexStr(stKey)}");
-                    Console.WriteLine($"tgtKey => {Hex.Bytes2HexStr(tgtKey)}");
-                    Console.WriteLine($"tgtToken => {Hex.Bytes2HexStr(tgtToken)}");
-                    Console.WriteLine($"d2Key => {Hex.Bytes2HexStr(d2Key)}");
-                    Console.WriteLine($"d2Token => {Hex.Bytes2HexStr(d2Token)}");
-
                     signinfo.TgtKey = tgtKey;
                     signinfo.TgtToken = tgtToken;
                     signinfo.D2Key = d2Key;
@@ -253,6 +246,16 @@ namespace Konata.Core.Service.WtLogin
                         Name = userNickname,
                         Uin = signinfo.UinInfo.Uin
                     };
+
+                    Console.WriteLine($"  [SignInfo] gtKey => { ByteConverter.Hex(signinfo.GtKey, true) }");
+                    Console.WriteLine($"  [SignInfo] stKey => { ByteConverter.Hex(signinfo.StKey, true) }");
+                    Console.WriteLine($"  [SignInfo] tgtKey => { ByteConverter.Hex(signinfo.TgtKey, true) }");
+                    Console.WriteLine($"  [SignInfo] tgtToken => { ByteConverter.Hex(signinfo.TgtToken, true) }");
+                    Console.WriteLine($"  [SignInfo] d2Key => { ByteConverter.Hex(signinfo.D2Key, true) }");
+                    Console.WriteLine($"  [SignInfo] d2Token => { ByteConverter.Hex(signinfo.D2Token, true) }");
+
+                    Console.WriteLine($"  [UinInfo] Uin => { signinfo.UinInfo.Uin }");
+                    Console.WriteLine($"  [UinInfo] Name => { signinfo.UinInfo.Name }");
 
                     return new WtLoginEvent
                     {

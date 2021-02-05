@@ -11,7 +11,7 @@ namespace Konata.Core.Packet.Oicq
         DoVerifySliderCaptcha = 2,
 
         DoVerifyDeviceLock = 204,
-        DoVerifyDeviceLockViaSms = 160,
+        DoVerifySms = 160,
         DoVerifyDeviceLockViaSmsNewArea = 239,
 
         PreventByIncorrectUserOrPwd = 1,

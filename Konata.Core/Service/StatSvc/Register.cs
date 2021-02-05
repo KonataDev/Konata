@@ -63,19 +63,19 @@ namespace Konata.Core.Service.StatSvc
                 vendorOSName = DeviceInfo.System.OsName,
                 osIdfa = "",
                 cmd0x769Reqbody = new byte[]
-                    {
-                            0x0A, 0x08, 0x08, 0x2E,
-                            0x10, 0x9A, 0xEF, 0x9C,
-                            0xFB, 0x05, 0x0A, 0x05,
-                            0x08, 0x9B, 0x02, 0x10, 0x00
-                    },
+                {
+                    0x0A, 0x08, 0x08, 0x2E,
+                    0x10, 0x9A, 0xEF, 0x9C,
+                    0xFB, 0x05, 0x0A, 0x05,
+                    0x08, 0x9B, 0x02, 0x10, 0x00
+                },
                 isSetStatus = 0,
                 extOnlineStatus = 0,
                 batteryStatus = 0
             });
 
-            if (SSOFrame.Create("StatSvc.register", PacketType.TypeA,
-                newSequence, sequence.Session, svcRequest, out var ssoFrame))
+            if (SSOFrame.Create("StatSvc.register", PacketType.TypeA, newSequence,
+                 signinfo.TgtToken, sequence.Session, svcRequest, out var ssoFrame))
             {
                 if (ServiceMessage.Create(ssoFrame, AuthFlag.D2Authentication,
                     signinfo.UinInfo.Uin, signinfo.D2Token, signinfo.D2Key, out var toService))
