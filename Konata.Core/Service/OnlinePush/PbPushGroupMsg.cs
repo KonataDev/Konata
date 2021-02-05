@@ -12,7 +12,7 @@ namespace Konata.Core.Service.OnlinePush
     {
         public bool Parse(SSOFrame input, SignInfo signInfo, out ProtocolEvent output)
         {
-            var protoRoot = new ProtoTreeRoot(input.Payload.GetBytes());
+            var protoRoot = new ProtoTreeRoot(input.Payload.GetBytes(), true);
             {
                 // Simplest way to read group message.
                 output = new GroupMessageEvent
