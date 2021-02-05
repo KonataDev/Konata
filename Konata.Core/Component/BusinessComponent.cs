@@ -14,7 +14,7 @@ namespace Konata.Core.Component
         public string TAG = "BusinessComponent";
 
         private OnlineStatusEvent.Type _onlineType;
-        private TaskCompletionSource<WtLoginEvent> _pendingUserOperation;
+        private TaskCompletionSource<WtLoginEvent> _userOperation;
 
         public BusinessComponent()
         {
@@ -25,19 +25,29 @@ namespace Konata.Core.Component
         {
             if (_onlineType == OnlineStatusEvent.Type.Offline)
             {
-                if (!await GetComponent<SocketComponent>().Connect(true))
+                var socketComp = GetComponent<SocketComponent>();
+                if (!await socketComp.Connect(true))
                 {
                     return false;
                 }
 
                 var wtStatus = await WtLogin();
                 {
-                    while (wtStatus == null || wtStatus.EventType != WtLoginEvent.Type.OK)
+                    while (true)
                     {
                         switch (wtStatus.EventType)
                         {
                             case WtLoginEvent.Type.OK:
-                                return true;
+                                if ((await SetClientOnineType
+                                    (OnlineStatusEvent.Type.Online)).EventType == OnlineStatusEvent.Type.Online)
+                                {
+                                    return true;
+                                }
+                                else
+                                {
+                                    await socketComp.DisConnect("Wtlogin failed.");
+                                    return false;
+                                }
 
                             case WtLoginEvent.Type.CheckSMS:
                             case WtLoginEvent.Type.CheckSlider:
@@ -76,12 +86,12 @@ namespace Konata.Core.Component
             return false;
         }
 
-        public async void SubmitSMSCode(string code)
-            => _pendingUserOperation.SetResult(new WtLoginEvent
+        public void SubmitSMSCode(string code)
+            => _userOperation.SetResult(new WtLoginEvent
             { EventType = WtLoginEvent.Type.CheckSMS, CaptchaResult = code });
 
-        public async void SubmitSliderTicket(string ticket)
-            => _pendingUserOperation.SetResult(new WtLoginEvent
+        public void SubmitSliderTicket(string ticket)
+            => _userOperation.SetResult(new WtLoginEvent
             { EventType = WtLoginEvent.Type.CheckSlider, CaptchaResult = ticket });
 
         internal async Task<WtLoginEvent> WtLogin()
@@ -100,12 +110,9 @@ namespace Konata.Core.Component
             => (WtLoginEvent)await PostEvent<PacketComponent>
             (await WaitForUserOperation());
 
-        private async Task<WtLoginEvent> WaitForUserOperation()
-        {
-            // _pendingUserOperation?.SetCanceled();
-            _pendingUserOperation = new TaskCompletionSource<WtLoginEvent>();
-            return await _pendingUserOperation.Task;
-        }
+        internal async Task<OnlineStatusEvent> SetClientOnineType(OnlineStatusEvent.Type onlineType)
+            => (OnlineStatusEvent)await PostEvent<PacketComponent>
+            (new OnlineStatusEvent { EventType = onlineType });
 
         public async Task<GroupKickMemberEvent> GroupKickMember(uint groupUin, uint memberUin, bool preventRequest)
             => (GroupKickMemberEvent)await PostEvent<PacketComponent>
@@ -125,19 +132,19 @@ namespace Konata.Core.Component
                     ToggleType = toggleAdmin
                 });
 
+        private async Task<WtLoginEvent> WaitForUserOperation()
+        {
+            _userOperation = new TaskCompletionSource<WtLoginEvent>();
+            return await _userOperation.Task;
+        }
+
         internal override void EventHandler(KonataTask task)
         {
             if (task.EventPayload is OnlineStatusEvent onlineStatusEvent)
             {
                 _onlineType = onlineStatusEvent.EventType;
             }
-
-            //else if ()
-            //{
-
-            //}
-
-            else LogW(TAG, "Unsupported event received.");
+            else PostEventToEntity(task.EventPayload);
         }
     }
 }

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Collections.Concurrent;
 
 using Konata.Utils;
+using Konata.Utils.IO;
 using Konata.Core.Event;
 using Konata.Core.Entity;
 using Konata.Core.Service;
@@ -82,29 +83,38 @@ namespace Konata.Core.Component
                     // Parse SSO frame
                     if (SSOFrame.Parse(serviceMsg, out var ssoFrame))
                     {
+                        LogV(TAG, ssoFrame.Command);
+
                         // Get SSO service by sso command
                         if (_services.TryGetValue(ssoFrame.Command, out var service))
                         {
-                            // Translate bytes to ProtocolEvent 
-                            if (service.Parse(ssoFrame, config.SignInfo, out var outEvent))
+                            try
                             {
-                                // Get pending request
-                                if (_pendingRequests.TryRemove(ssoFrame.Sequence, out var request))
+                                // Translate bytes to ProtocolEvent 
+                                if (service.Parse(ssoFrame, config.SignInfo, out var outEvent))
                                 {
-                                    request.SetResult(outEvent);
+                                    // Get pending request
+                                    if (_pendingRequests.TryRemove(ssoFrame.Sequence, out var request))
+                                    {
+                                        request.SetResult(outEvent);
+                                    }
+                                    else
+                                    {
+                                        PostEvent<BusinessComponent>(outEvent);
+                                    }
                                 }
-                                else
-                                {
-                                    PostEvent<BusinessComponent>(outEvent);
-                                }
+                                else LogW(TAG, $"This message cannot be processed. { ssoFrame.Command }");
                             }
-                            else LogW(TAG, $"This sso frame cannot be processed. { ssoFrame.Command } { ssoFrame.Payload }");
+                            catch
+                            {
+                                LogW(TAG, $"Thrown an exception while processing a message  . { ssoFrame.Command }");
+                            }
                         }
-                        else LogW(TAG, $"Unsupported sso frame received. { ssoFrame.Command } { ssoFrame.Payload }");
+                        else LogW(TAG, $"Unsupported sso frame received. { ssoFrame.Command }");
                     }
-                    else LogW(TAG, $"Parse sso frame failed. { ssoFrame.Command } { ssoFrame.Payload }");
+                    else LogW(TAG, $"Parse sso frame failed. { ssoFrame.Command }");
                 }
-                else LogW(TAG, $"Parse service message failed. \n D2 => { config.SignInfo.D2Key }\n Buffer => { packetEvent.Buffer }");
+                else LogW(TAG, $"Parse service message failed. \n D2 => { ByteConverter.Hex(config.SignInfo.D2Key, true) }");
             }
 
             // Protocol Event

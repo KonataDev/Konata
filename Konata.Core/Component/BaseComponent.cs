@@ -36,8 +36,9 @@ namespace Konata.Core.Component
         protected void Log(LogLevel logLevel, string tag, string content)
             => PostEventToEntity(new LogEvent
             {
+                Tag  = tag,
                 Level = logLevel,
-                EventMessage = $"{tag} {content}"
+                EventMessage = content
             });
 
         protected void LogV(string tag, string content)

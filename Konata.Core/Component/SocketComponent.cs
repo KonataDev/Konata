@@ -8,6 +8,7 @@ using Konata.Core.Event;
 using Konata.Core.Event.EventModel;
 using Konata.Core.Entity;
 using System.Threading;
+using Konata.Utils.IO;
 
 namespace Konata.Core.Component
 {
@@ -139,6 +140,7 @@ namespace Konata.Core.Component
             try
             {
                 _recvLength += _socket.EndReceive(result);
+                Console.WriteLine(ByteConverter.Hex(_recvBuffer));
 
                 if (_recvStatus == ReceiveStatus.Idle)
                 {
@@ -209,7 +211,7 @@ namespace Konata.Core.Component
                     EventType = PacketEvent.Type.Receive
                 });
 
-                LogV(TAG, $"Recv data => { Hex.Bytes2HexStr(packet) }");
+                LogV(TAG, $"Recv data => \n  { ByteConverter.Hex(buffer, true) }");
             }
         }
 
@@ -228,7 +230,7 @@ namespace Konata.Core.Component
 
             try
             {
-                LogV(TAG, $"Send data => \n{Hex.Bytes2HexStr(buffer)}");
+                LogV(TAG, $"Send data => \n  { ByteConverter.Hex(buffer, true) }");
                 _socket.BeginSend(buffer, 0, buffer.Length, SocketFlags.None, BeginSendData, null);
             }
             catch (Exception e)
