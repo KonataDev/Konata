@@ -1,5 +1,6 @@
 ﻿using System;
 using Konata.Utils.IO;
+using Konata.Utils.Protobuf.ProtoModel;
 
 namespace Konata.Utils.Protobuf
 {

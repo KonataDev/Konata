@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Konata.Utils.Protobuf
+namespace Konata.Utils.Protobuf.ProtoModel
 {
     internal enum ProtoType : byte
     {
@@ -17,5 +17,10 @@ namespace Konata.Utils.Protobuf
         EndGroup = 4,
 
         Bit32 = 5,
+    }
+
+    public interface IProtoType
+    {
+
     }
 }
