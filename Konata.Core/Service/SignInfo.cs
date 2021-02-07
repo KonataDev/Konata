@@ -6,6 +6,7 @@ using System.Text;
 using Konata.Utils.Crypto;
 using Konata.Core.Packet.Oicq;
 using Konata.Core.Packet.Protobuf;
+using Konata.Utils.Protobuf;
 
 namespace Konata.Core.Service
 {
@@ -184,7 +185,7 @@ namespace Konata.Core.Service
 
         private static byte[] MakeSyncCookie()
         {
-            return new SyncCookie(DateTimeOffset.UtcNow.ToUnixTimeSeconds()).Serialize().GetBytes();
+            return ProtoTreeRoot.Serialize(new SyncCookie(DateTimeOffset.UtcNow.ToUnixTimeSeconds())).GetBytes();
         }
     }
 }
