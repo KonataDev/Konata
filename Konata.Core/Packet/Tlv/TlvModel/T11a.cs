@@ -4,8 +4,9 @@ namespace Konata.Core.Packet.Tlv.TlvModel
 {
     public class T11aBody : TlvBody
     {
-        public readonly byte _age;
         public readonly ushort _face;
+        public readonly byte _age;
+        public readonly byte _gender;
         public readonly string _nickName;
 
         public T11aBody(ushort face, byte age, string nickName)
@@ -25,6 +26,7 @@ namespace Konata.Core.Packet.Tlv.TlvModel
         {
             TakeUshortBE(out _face);
             TakeByte(out _age);
+            TakeByte(out _gender);
             TakeString(out _nickName, Prefix.Uint8);
         }
     }
