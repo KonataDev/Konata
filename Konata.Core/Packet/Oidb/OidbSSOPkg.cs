@@ -33,12 +33,12 @@ namespace Konata.Core.Packet.Oidb
                 {
                     writer(payload);
                 }
-                root.AddLeafByteBuffer("22", payload.Serialize());
+                root.AddLeafByteBuffer("22", ProtoTreeRoot.Serialize(payload));
 
                 root.AddLeafString("28", errorMsg);
                 root.AddLeafString("30", clientVer);
             }
-            PutByteBuffer(root.Serialize());
+            PutByteBuffer(ProtoTreeRoot.Serialize(root));
         }
 
         public OidbSSOPkg(uint cmd, uint type, uint? result, OidbByteBufferWriter writer)
@@ -62,7 +62,7 @@ namespace Konata.Core.Packet.Oidb
                 root.AddLeafString("28", errorMsg);
                 root.AddLeafString("30", clientVer);
             }
-            PutByteBuffer(root.Serialize());
+            PutByteBuffer(ProtoTreeRoot.Serialize(root));
         }
 
         public OidbSSOPkg(byte[] data)

@@ -17,13 +17,13 @@ namespace Konata.Core.Packet.Protobuf
         public ProtoPbPushGroupMsg(byte[] payload)
             : base(payload, true)
         {
-            GroupName = GetLeafString("0A.0A.4A.42", out var _);
-            GroupUin = (uint)GetLeafVar("0A.0A.4A.08", out var _);
+            GroupName = GetLeafString("0A.0A.4A.42");
+            GroupUin = (uint)GetLeafVar("0A.0A.4A.08");
 
-            MemberName = GetLeafString("0A.0A.4A.22", out var _);
-            MemberUin = (uint)GetLeafVar("0A.0A.08", out var _);
+            MemberName = GetLeafString("0A.0A.4A.22");
+            MemberUin = (uint)GetLeafVar("0A.0A.08");
 
-            MsgContent = GetLeafString("0A.1A.0A.12.0A.0A", out var _);
+            MsgContent = GetLeafString("0A.1A.0A.12.0A.0A");
         }
     }
 }

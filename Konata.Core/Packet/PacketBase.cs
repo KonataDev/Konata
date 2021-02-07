@@ -69,7 +69,7 @@ namespace Konata.Core.Packet
         /// <param name="value"></param>
         public void PutProtoNode(ProtoTreeRoot value)
         {
-            PutBytes(value.Serialize().GetBytes());
+            PutBytes(ProtoTreeRoot.Serialize(value).GetBytes());
         }
 
         public string TakeHexString(out string value, Prefix prefixFlag)
