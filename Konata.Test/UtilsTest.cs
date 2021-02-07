@@ -33,27 +33,5 @@ namespace Konata.Test
             Assert.AreEqual(length, 4);
             Assert.AreEqual(outstr, "Test");
         }
-
-        [Test]
-        [Category("proto树结构展示")]
-        public void ProtoTreeFunction()
-        {
-            var root = new ProtoTreeRoot();
-            {
-                root.AddTree("0A", (ProtoTreeRoot root1) =>
-                {
-                    root1.AddTree("0A", (ProtoTreeRoot root2) =>
-                    {
-                        root2.AddTree("0A", (ProtoTreeRoot root3) =>
-                        {
-                            root3.AddLeafString("0A", "Hello Konata!");
-                        });
-                    });
-                });
-            }
-
-            PrintBytes(root.Serialize().GetBytes());
-            Assert.Pass();
-        }
     }
 }
