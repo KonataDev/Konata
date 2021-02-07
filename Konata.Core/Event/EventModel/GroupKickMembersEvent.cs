@@ -12,5 +12,8 @@ namespace Konata.Core.Event.EventModel
         /// <b>KickMembers</b>: Block the members <br/>
         /// </summary>
         public bool ToggleType { get; set; }
+
+        public GroupKickMembersEvent()
+            => WaitForResponse = true;
     }
 }

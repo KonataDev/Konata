@@ -76,5 +76,8 @@ namespace Konata.Core.Event.EventModel
         public string SliderURL { get; set; }
 
         public string CaptchaResult { get; set; }
+
+        public WtLoginEvent()
+            => WaitForResponse = true;
     }
 }

@@ -21,5 +21,8 @@ namespace Konata.Core.Event.EventModel
         ///  Flag to toggle set or unset. <br/>
         /// </summary>
         public bool ToggleType { get; set; }
+
+        public GroupPromoteAdminEvent()
+            => WaitForResponse = true;
     }
 }

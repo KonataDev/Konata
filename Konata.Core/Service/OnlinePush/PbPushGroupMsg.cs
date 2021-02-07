@@ -10,7 +10,7 @@ using Konata.Utils.Protobuf;
 namespace Konata.Core.Service.OnlinePush
 {
     [Service("OnlinePush.PbPushGroupMsg", "Receive group message from server")]
-    [Event(typeof(GroupMessageEvent))]
+    [ParseEvent(typeof(GroupMessageEvent))]
     public class PbPushGroupMsg : IService
     {
         public bool Parse(SSOFrame input, SignInfo signInfo, out ProtocolEvent output)
@@ -23,6 +23,7 @@ namespace Konata.Core.Service.OnlinePush
                     var sourceRoot = (ProtoTreeRoot)ProtoTreeRoot.PathTo(root, "0A.0A");
                     {
                         message.MemberUin = (uint)sourceRoot.GetLeafVar("08");
+                        message.MessageId = (uint)sourceRoot.GetLeafVar("28");
                         message.MessageTime = (uint)sourceRoot.GetLeafVar("30");
 
                         sourceRoot = (ProtoTreeRoot)ProtoTreeRoot.PathTo(sourceRoot, "4A");
@@ -84,11 +85,12 @@ namespace Konata.Core.Service.OnlinePush
                         });
 
                         message.Message = list;
+                        message.SessionSequence = input.Sequence;
                     }
 
                 }
             }
-
+            
             output = message;
             return true;
         }

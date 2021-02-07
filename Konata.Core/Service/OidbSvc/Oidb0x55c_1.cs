@@ -8,7 +8,7 @@ using Konata.Core.Packet.Oidb.OidbModel;
 namespace Konata.Core.Service.OidbSvc
 {
     [Service("OidbSvc.0x55c_1", "Promote admin for member")]
-    [Event(typeof(GroupPromoteAdminEvent))]
+    [ParseEvent(typeof(GroupPromoteAdminEvent))]
     public class Oidb0x55c_1 : IService
     {
         public bool Parse(SSOFrame input, SignInfo signInfo, out ProtocolEvent output)

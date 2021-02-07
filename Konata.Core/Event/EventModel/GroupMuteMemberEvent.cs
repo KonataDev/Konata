@@ -12,5 +12,8 @@ namespace Konata.Core.Event.EventModel
         /// <b>MuteMember</b>: Mute time <br/>
         /// </summary>
         public uint? TimeSeconds { get; set; }
+
+        public GroupMuteMemberEvent()
+            => WaitForResponse = true;
     }
 }

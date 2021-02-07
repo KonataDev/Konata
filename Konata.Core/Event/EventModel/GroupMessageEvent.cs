@@ -15,6 +15,8 @@ namespace Konata.Core.Event.EventModel
 
         public List<GroupMessageChain> Message { get; set; }
 
+        public uint MessageId { get; set; }
+
         public uint MessageTime { get; set; }
 
         public uint SliceTotal { get; set; }
@@ -36,6 +38,9 @@ namespace Konata.Core.Event.EventModel
 
             return content;
         }
+
+        public GroupMessageEvent()
+            => WaitForResponse = true;
     }
 
     public class GroupMessageChain

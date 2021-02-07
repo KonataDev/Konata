@@ -17,5 +17,8 @@ namespace Konata.Core.Event.EventModel
         /// Special title
         /// </summary>
         public string SpecialTitle { get; set; }
+
+        public GroupSpecialTitleEvent()
+            => WaitForResponse = true;
     }
 }

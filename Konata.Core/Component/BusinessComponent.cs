@@ -38,8 +38,8 @@ namespace Konata.Core.Component
                         switch (wtStatus.EventType)
                         {
                             case WtLoginEvent.Type.OK:
-                                if ((await SetClientOnineType
-                                    (OnlineStatusEvent.Type.Online)).EventType == OnlineStatusEvent.Type.Online)
+                                if ((await SetClientOnineType(OnlineStatusEvent.Type.Online)).
+                                    EventType == OnlineStatusEvent.Type.Online)
                                 {
                                     return true;
                                 }
@@ -132,6 +132,15 @@ namespace Konata.Core.Component
                     ToggleType = toggleAdmin
                 });
 
+        internal async void ConfirmReadGroupMessage(GroupMessageEvent groupMessage)
+            => await PostEvent<PacketComponent>
+                (new GroupMessageReadEvent
+                {
+                    GroupUin = groupMessage.GroupUin,
+                    RequestId = groupMessage.MessageId,
+                    SessionSequence = groupMessage.SessionSequence,
+                });
+
         private async Task<WtLoginEvent> WaitForUserOperation()
         {
             _userOperation = new TaskCompletionSource<WtLoginEvent>();
@@ -142,15 +151,21 @@ namespace Konata.Core.Component
         {
             switch (task.EventPayload)
             {
+                // Receive online status from server
                 case OnlineStatusEvent onlineStatusEvent:
-                    _onlineType = onlineStatusEvent.EventType; break;
+                    _onlineType = onlineStatusEvent.EventType;
+                    break;
 
+                // Confirm with server about we have read group message
                 case GroupMessageEvent groupMessageEvent:
+                    ConfirmReadGroupMessage(groupMessageEvent);
+                    goto default;
 
+                // Pass messages to upstream
                 default:
-                    PostEventToEntity(task.EventPayload); break;
+                    PostEventToEntity(task.EventPayload);
+                    break;
             }
-
         }
     }
 }

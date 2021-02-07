@@ -23,5 +23,8 @@ namespace Konata.Core.Event.EventModel
         ///  The default value is <b>false</b>
         /// </summary>
         public bool ToggleType { get; set; }
+
+        public GroupKickMemberEvent()
+            => WaitForResponse = true;
     }
 }

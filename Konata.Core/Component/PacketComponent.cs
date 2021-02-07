@@ -51,7 +51,7 @@ namespace Konata.Core.Component
             // Create sso services
             foreach (var type in Reflection.GetClassesByAttribute<ServiceAttribute>())
             {
-                var eventAttrs = type.GetCustomAttributes<EventAttribute>();
+                var eventAttrs = type.GetCustomAttributes<ParseEventAttribute>();
                 var serviceAttr = type.GetCustomAttribute<ServiceAttribute>();
 
                 if (serviceAttr != null)
@@ -93,14 +93,19 @@ namespace Konata.Core.Component
                                 // Translate bytes to ProtocolEvent 
                                 if (service.Parse(ssoFrame, config.SignInfo, out var outEvent))
                                 {
-                                    // Get pending request
-                                    if (_pendingRequests.TryRemove(ssoFrame.Sequence, out var request))
+                                    if (outEvent != null)
                                     {
-                                        request.SetResult(outEvent);
-                                    }
-                                    else
-                                    {
-                                        PostEvent<BusinessComponent>(outEvent);
+                                        // Get pending request
+                                        if (_pendingRequests.TryRemove(ssoFrame.Sequence, out var request))
+                                        {
+                                            // Set result
+                                            request.SetResult(outEvent);
+                                        }
+                                        else
+                                        {
+                                            // Pass this message to business
+                                            PostEvent<BusinessComponent>(outEvent);
+                                        }
                                     }
                                 }
                                 else LogW(TAG, $"This message cannot be processed. { ssoFrame.Command }");
@@ -120,29 +125,38 @@ namespace Konata.Core.Component
             // Protocol Event
             else if (task.EventPayload is ProtocolEvent protocolEvent)
             {
+                // If no service supported this message
                 if (!_servicesEventType.TryGetValue(protocolEvent.GetType(), out var serviceList))
                 {
+                    // Drop it
                     task.CompletionSource.SetResult(null);
                     return;
                 }
 
+                // Enumerate all of the service then make binary packet
                 foreach (var service in serviceList)
                 {
                     if (service.Build(_serviceSequence, protocolEvent, config.SignInfo, out var sequence, out var buffer))
                     {
+                        // Pass messages to socket
                         PostEvent<SocketComponent>(new PacketEvent
                         {
                             Buffer = buffer,
                             EventType = PacketEvent.Type.Send
                         });
 
-                    AddPending:
-                        if (!_pendingRequests.TryAdd(sequence, task.CompletionSource))
+                        // Is need response from server
+                        if (protocolEvent.WaitForResponse)
                         {
-                            _pendingRequests[sequence].SetCanceled();
-                            _pendingRequests.TryRemove(sequence, out _);
+                        AddPending:
+                            if (!_pendingRequests.TryAdd(sequence, task.CompletionSource))
+                            {
+                                _pendingRequests[sequence].SetCanceled();
+                                _pendingRequests.TryRemove(sequence, out _);
 
-                            goto AddPending;
+                                // Try it again
+                                goto AddPending;
+                            }
                         }
                     }
                 }

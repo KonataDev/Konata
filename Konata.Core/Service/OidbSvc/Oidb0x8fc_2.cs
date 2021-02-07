@@ -8,7 +8,7 @@ using Konata.Core.Packet.Oidb.OidbModel;
 namespace Konata.Core.Service.OidbSvc
 {
     [Service("OidbSvc.0x8fc_2", "Set special title for member")]
-    [Event(typeof(GroupSpecialTitleEvent))]
+    [ParseEvent(typeof(GroupSpecialTitleEvent))]
     public class Oidb0x8fc_2 : IService
     {
         public bool Parse(SSOFrame input, SignInfo signInfo, out ProtocolEvent output)

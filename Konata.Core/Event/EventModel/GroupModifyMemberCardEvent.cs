@@ -21,5 +21,8 @@ namespace Konata.Core.Event.EventModel
         ///   Member groupd card  <br/>
         /// </summary>
         public string MemberCard { get; set; }
+
+        public GroupModifyMemberCardEvent()
+            => WaitForResponse = true;
     }
 }

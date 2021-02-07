@@ -8,7 +8,7 @@ using Konata.Core.Packet.SvcRequest;
 namespace Konata.Core.Service.Friendlist
 {
     [Service("friendlist.ModifyGroupCardReq", "Modify group card")]
-    [Event(typeof(GroupModifyMemberCardEvent))]
+    [ParseEvent(typeof(GroupModifyMemberCardEvent))]
     public class ModifyGroupCardReq : IService
     {
         public bool Parse(SSOFrame input, SignInfo signInfo, out ProtocolEvent output)
