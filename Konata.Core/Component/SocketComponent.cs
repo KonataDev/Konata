@@ -142,29 +142,50 @@ namespace Konata.Core.Component
                 _recvLength += _socket.EndReceive(result);
                 Console.WriteLine(ByteConverter.Hex(_recvBuffer));
 
+            ReceiveNext:
+
+                // If receive status is Idle
                 if (_recvStatus == ReceiveStatus.Idle)
                 {
+                    // If receive length too short
                     if (_recvLength < 4)
                     {
                         Thread.Sleep(10);
                         return;
                     }
 
+                    // Take out first 4 bytes as this packet length
                     _packetLength = BitConverter.ToInt32(_recvBuffer.Take(4).Reverse().ToArray(), 0);
-                    //if (_recvBuffer.Length < _packetLength)
-                    Array.Resize(ref _recvBuffer, _packetLength);
+                    if (_packetLength > _recvBuffer.Length)
+                        Array.Resize(ref _recvBuffer, _packetLength);
 
+                    // Prepare for receive packet body
                     _recvStatus = ReceiveStatus.RecvBody;
                 }
 
+                // If ready for receive packet body
                 if (_recvStatus == ReceiveStatus.RecvBody)
                 {
-                    if (_recvLength == _packetLength)
+                    // If receive length bigger than packet langth
+                    // Means we have received at least 1 packet
+                    if (_recvLength >= _packetLength)
                     {
-                        _recvLength = 0;
-                        _recvStatus = ReceiveStatus.Idle;
-
+                        // Process this packet
                         OnReceivePacket(_recvBuffer, _packetLength);
+
+                        // Calculate remain length
+                        _recvStatus = ReceiveStatus.Idle;
+                        _recvLength = _recvLength - _packetLength;
+
+                        // If next packet existed
+                        if (_recvLength > 0)
+                        {
+                            // Move remain data to ahead
+                            Array.Copy(_recvBuffer, _packetLength, _recvBuffer, 0, _recvLength);
+                            
+                            // Process it again!
+                            goto ReceiveNext;
+                        }
                     }
                 }
             }
@@ -207,11 +228,11 @@ namespace Konata.Core.Component
                 Array.Copy(buffer, 0, packet, 0, length);
                 PostEvent<PacketComponent>(new PacketEvent
                 {
-                    Buffer = buffer,
+                    Buffer = packet,
                     EventType = PacketEvent.Type.Receive
                 });
 
-                LogV(TAG, $"Recv data => \n  { ByteConverter.Hex(buffer, true) }");
+                LogV(TAG, $"Recv data => \n  { ByteConverter.Hex(packet, true) }");
             }
         }
 
