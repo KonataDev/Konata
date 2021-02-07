@@ -140,11 +140,17 @@ namespace Konata.Core.Component
 
         internal override void EventHandler(KonataTask task)
         {
-            if (task.EventPayload is OnlineStatusEvent onlineStatusEvent)
+            switch (task.EventPayload)
             {
-                _onlineType = onlineStatusEvent.EventType;
+                case OnlineStatusEvent onlineStatusEvent:
+                    _onlineType = onlineStatusEvent.EventType; break;
+
+                case GroupMessageEvent groupMessageEvent:
+
+                default:
+                    PostEventToEntity(task.EventPayload); break;
             }
-            else PostEventToEntity(task.EventPayload);
+
         }
     }
 }

@@ -107,7 +107,7 @@ namespace Konata.Core.Component
                             }
                             catch
                             {
-                                LogW(TAG, $"Thrown an exception while processing a message  . { ssoFrame.Command }");
+                                LogW(TAG, $"Thrown an exception while processing a message. { ssoFrame.Command }");
                             }
                         }
                         else LogW(TAG, $"Unsupported sso frame received. { ssoFrame.Command }");
