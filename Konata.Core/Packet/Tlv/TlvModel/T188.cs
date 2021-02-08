@@ -1,4 +1,5 @@
 ﻿using Konata.Utils;
+using Konata.Utils.IO;
 using Konata.Utils.Crypto;
 
 namespace Konata.Core.Packet.Tlv.TlvModel
@@ -18,7 +19,7 @@ namespace Konata.Core.Packet.Tlv.TlvModel
         public T188Body(string androidId)
             : base()
         {
-            _androidIdMd5 = new Md5Cryptor().Encrypt(Hex.HexStr2Bytes(androidId));
+            _androidIdMd5 = new Md5Cryptor().Encrypt(ByteConverter.UnHex(androidId));
 
             PutBytes(_androidIdMd5);
         }

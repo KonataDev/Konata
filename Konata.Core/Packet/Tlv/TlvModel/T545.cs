@@ -1,4 +1,5 @@
 ﻿using Konata.Utils;
+using Konata.Utils.IO;
 using Konata.Utils.Crypto;
 
 namespace Konata.Core.Packet.Tlv.TlvModel
@@ -10,7 +11,7 @@ namespace Konata.Core.Packet.Tlv.TlvModel
         public T545Body(string qiMei = "")
             : base()
         {
-            _unknownQiMeiMd5 = new Md5Cryptor().Encrypt(Hex.HexStr2Bytes(qiMei));
+            _unknownQiMeiMd5 = new Md5Cryptor().Encrypt(ByteConverter.UnHex(qiMei));
 
             PutBytes(_unknownQiMeiMd5);
         }

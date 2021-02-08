@@ -74,7 +74,7 @@ namespace Konata.Core.Packet
 
         public string TakeHexString(out string value, Prefix prefixFlag)
         {
-            return value = Hex.Bytes2HexStr(TakeBytes(out byte[] _, prefixFlag));
+            return value = ByteConverter.Hex(TakeBytes(out byte[] _, prefixFlag));
         }
 
         public byte[] TakeDecryptedBytes(out byte[] value, ICryptor cryptor, byte[] cryptKey,

@@ -1,6 +1,7 @@
 ﻿using System;
 
 using Konata.Utils;
+using Konata.Utils.IO;
 
 namespace Konata.Test
 {
@@ -13,7 +14,7 @@ namespace Konata.Test
                 foreach (var element in args)
                 {
                     if (element.GetType() == typeof(byte[]))
-                        Console.Write(Hex.Bytes2HexStr((byte[])element));
+                        Console.Write(ByteConverter.Hex((byte[])element));
                     else
                         Console.Write(element.ToString());
 
