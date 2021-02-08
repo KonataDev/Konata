@@ -237,7 +237,7 @@ namespace Konata.Utils.Protobuf
 
         public IProtoType PathTo(string leafPath)
             => PathTo(this, leafPath);
-
+        
         #endregion
 
         /// <summary>
