@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+
 using Konata.Core.Event;
 using Konata.Core.Event.EventModel;
+using Konata.Core.Message;
+using Konata.Core.Message.Model;
 using Konata.Core.Packet;
 using Konata.Utils.IO;
 using Konata.Utils.Protobuf;
@@ -11,7 +14,7 @@ using Konata.Utils.Protobuf.ProtoModel;
 namespace Konata.Core.Service.OnlinePush
 {
     [Service("OnlinePush.PbPushGroupMsg", "Receive group message from server")]
-    [ParseEvent(typeof(GroupMessageEvent))]
+    [EventDepends(typeof(GroupMessageEvent))]
     public class PbPushGroupMsg : IService
     {
         public bool Parse(SSOFrame input, SignInfo signInfo, out ProtocolEvent output)
@@ -21,7 +24,7 @@ namespace Konata.Core.Service.OnlinePush
                 var root = ProtoTreeRoot.Deserialize(input.Payload, true);
                 {
                     // Parse message source information
-                    var sourceRoot = (ProtoTreeRoot)ProtoTreeRoot.PathTo(root, "0A.0A");
+                    var sourceRoot = (ProtoTreeRoot)root.PathTo("0A.0A");
                     {
                         message.MemberUin = (uint)sourceRoot.GetLeafVar("08");
                         message.MessageId = (uint)sourceRoot.GetLeafVar("28");
@@ -51,7 +54,7 @@ namespace Konata.Core.Service.OnlinePush
                     }
 
                     // Parse message slice information
-                    var sliceInfoRoot = (ProtoTreeRoot)ProtoTreeRoot.PathTo(root, "0A.12");
+                    var sliceInfoRoot = (ProtoTreeRoot)root.PathTo("0A.12");
                     {
                         message.SliceTotal = (uint)sliceInfoRoot.GetLeafVar("08");
                         message.SliceIndex = (uint)sliceInfoRoot.GetLeafVar("10");
@@ -59,9 +62,9 @@ namespace Konata.Core.Service.OnlinePush
                     }
 
                     // Parse message content
-                    var contentRoot = (ProtoTreeRoot)ProtoTreeRoot.PathTo(root, "0A.1A.0A");
+                    var contentRoot = (ProtoTreeRoot)root.PathTo("0A.1A.0A");
                     {
-                        List<GroupMessageChain> list = new List<GroupMessageChain>();
+                        List<MessageChain> list = new List<MessageChain>();
 
                         contentRoot.ForEach((_, __) =>
                         {
@@ -69,7 +72,7 @@ namespace Konata.Core.Service.OnlinePush
                             {
                                 ((ProtoTreeRoot)__).ForEach((key, value) =>
                                 {
-                                    GroupMessageChain chain = null;
+                                    MessageChain chain = null;
                                     try
                                     {
                                         switch (key)
@@ -103,7 +106,6 @@ namespace Konata.Core.Service.OnlinePush
                         message.Message = list;
                         message.SessionSequence = input.Sequence;
                     }
-
                 }
             }
 
@@ -116,9 +118,9 @@ namespace Konata.Core.Service.OnlinePush
         /// </summary>
         /// <param name="tree"></param>
         /// <returns></returns>
-        private GroupMessageChain ParsePicture(ProtoTreeRoot tree)
+        private MessageChain ParsePicture(ProtoTreeRoot tree)
         {
-            return new ChainImage
+            return new ImageChain
             {
                 ImageUrl = tree.GetLeafString("8201"),
                 FileHash = ByteConverter.Hex(tree.GetLeafBytes("6A")),
@@ -131,7 +133,7 @@ namespace Konata.Core.Service.OnlinePush
         /// </summary>
         /// <param name="tree"></param>
         /// <returns></returns>
-        private GroupMessageChain ParsePlainText(ProtoTreeRoot tree)
+        private MessageChain ParsePlainText(ProtoTreeRoot tree)
         {
             // At chain
             if (tree.TryGetLeafBytes("1A", out var atBytes))
@@ -139,13 +141,13 @@ namespace Konata.Core.Service.OnlinePush
                 var at = ByteConverter.BytesToUInt32
                     (atBytes.Skip(7).Take(4).ToArray(), 0, Endian.Big);
 
-                return new ChainAt { AtUin = at };
+                return new AtChain { AtUin = at };
             }
 
             // Plain text chain
             if (tree.TryGetLeafString("0A", out var content))
             {
-                return new ChainText { Content = content };
+                return new PlainTextChain { Content = content };
             }
 
             return null;
@@ -156,9 +158,9 @@ namespace Konata.Core.Service.OnlinePush
         /// </summary>
         /// <param name="tree"></param>
         /// <returns></returns>
-        private GroupMessageChain ParseQFace(ProtoTreeRoot tree)
+        private MessageChain ParseQFace(ProtoTreeRoot tree)
         {
-            return new ChainQFace
+            return new QFaceChain
             {
                 FaceId = (uint)tree.GetLeafVar("08")
             };

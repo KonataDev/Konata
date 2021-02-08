@@ -9,7 +9,7 @@ using Konata.Core.Packet.Oidb.OidbModel;
 namespace Konata.Core.Service.OidbSvc
 {
     [Service("OidbSvc.0x8a0_1", "Kick member in the group")]
-    [ParseEvent(typeof(GroupKickMemberEvent))]
+    [EventDepends(typeof(GroupKickMemberEvent))]
     class Oidb0x8a0_1 : IService
     {
         public bool Parse(SSOFrame input, SignInfo signInfo, out ProtocolEvent output)

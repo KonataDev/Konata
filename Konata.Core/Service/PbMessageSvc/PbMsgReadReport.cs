@@ -9,7 +9,7 @@ using Konata.Utils.Protobuf;
 namespace Konata.Core.Service.PbMessageSvc
 {
     [Service("PbMessageSvc.PbMsgReadedReport", "Push read signal")]
-    [ParseEvent(typeof(GroupMessageReadEvent))]
+    [EventDepends(typeof(GroupMessageReadEvent))]
     internal class PbMsgReadReport : IService
     {
         public bool Parse(SSOFrame input, SignInfo signInfo, out ProtocolEvent output)

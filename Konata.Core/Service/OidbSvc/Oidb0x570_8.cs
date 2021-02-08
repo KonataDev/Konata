@@ -8,7 +8,7 @@ using Konata.Core.Packet.Oidb.OidbModel;
 namespace Konata.Core.Service.OidbSvc
 {
     [Service("OidbSvc.0x570_8", "Mute member in the group")]
-    [ParseEvent(typeof(GroupMuteMemberEvent))]
+    [EventDepends(typeof(GroupMuteMemberEvent))]
     public class Oidb0x570_8 : IService
     {
         public bool Parse(SSOFrame input, SignInfo signInfo, out ProtocolEvent output)

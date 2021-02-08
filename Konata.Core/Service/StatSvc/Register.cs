@@ -9,7 +9,7 @@ using Konata.Core.Packet.SvcResponse;
 namespace Konata.Core.Service.StatSvc
 {
     [Service("StatSvc.register", "Register client")]
-    [ParseEvent(typeof(OnlineStatusEvent))]
+    [EventDepends(typeof(OnlineStatusEvent))]
     public class Register : IService
     {
         public bool Parse(SSOFrame input, SignInfo signinfo, out ProtocolEvent output)

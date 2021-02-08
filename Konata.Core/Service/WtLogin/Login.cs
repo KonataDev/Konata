@@ -13,7 +13,7 @@ using Konata.Utils.Crypto;
 namespace Konata.Core.Service.WtLogin
 {
     [Service("wtlogin.login", "WtLogin exchange")]
-    [ParseEvent(typeof(WtLoginEvent))]
+    [EventDepends(typeof(WtLoginEvent))]
     public class Login : IService
     {
         public bool Parse(SSOFrame ssoFrame, SignInfo signinfo, out ProtocolEvent output)

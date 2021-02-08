@@ -8,7 +8,7 @@ using Konata.Core.Event.EventModel;
 namespace Konata.Core.Service.Friendlist
 {
     [Service("friendlist.GetTroopListReqV2", "Pull group list")]
-    [ParseEvent(typeof(PullTroopListEvent))]
+    [EventDepends(typeof(PullTroopListEvent))]
     public class GetTroopListReqV2 : IService
     {
         public bool Parse(SSOFrame input, SignInfo signInfo, out ProtocolEvent output)

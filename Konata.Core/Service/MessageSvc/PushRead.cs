@@ -9,14 +9,9 @@ namespace Konata.Core.Service.MessageSvc
     public class PushRead : IService
     {
         public bool Parse(SSOFrame input, SignInfo signInfo, out ProtocolEvent output)
-        {
-            throw new NotImplementedException();
-        }
+            => (output = null) == null;
 
         public bool Build(Sequence sequence, ProtocolEvent input, SignInfo signInfo,
-            out int newSequence, out byte[] output)
-        {
-            throw new NotImplementedException();
-        }
+            out int newSequence, out byte[] output) => throw new NotImplementedException();
     }
 }
