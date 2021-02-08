@@ -6,6 +6,7 @@ using Konata.Core.Event.EventModel;
 using Konata.Core.Packet;
 using Konata.Utils.IO;
 using Konata.Utils.Protobuf;
+using Konata.Utils.Protobuf.ProtoModel;
 
 namespace Konata.Core.Service.OnlinePush
 {
@@ -26,11 +27,26 @@ namespace Konata.Core.Service.OnlinePush
                         message.MessageId = (uint)sourceRoot.GetLeafVar("28");
                         message.MessageTime = (uint)sourceRoot.GetLeafVar("30");
 
-                        sourceRoot = (ProtoTreeRoot)ProtoTreeRoot.PathTo(sourceRoot, "4A");
+                        sourceRoot = (ProtoTreeRoot)sourceRoot.PathTo("4A");
                         {
                             message.GroupUin = (uint)sourceRoot.GetLeafVar("08");
-                            message.MemberCard = sourceRoot.GetLeafString("22");
                             message.GroupName = sourceRoot.GetLeafString("42");
+
+                            // Try get member card
+                            if (sourceRoot.TryGetLeafString("22", out var cardText))
+                            {
+                                message.MemberCard = cardText;
+                            }
+                            else
+                            {
+                                // This member card contains a color code
+                                // We need to ignore this
+                                sourceRoot = (ProtoTreeRoot)sourceRoot.PathTo("22");
+                                if (sourceRoot.GetLeaves("0A").Count == 2)
+                                {
+                                    message.MemberCard = ((ProtoLengthDelimited)sourceRoot.PathTo("0A[1].12")).ToString();
+                                }
+                            }
                         }
                     }
 
@@ -90,7 +106,7 @@ namespace Konata.Core.Service.OnlinePush
 
                 }
             }
-            
+
             output = message;
             return true;
         }
