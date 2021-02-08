@@ -51,7 +51,7 @@ namespace Konata.Core.Component
             // Create sso services
             foreach (var type in Reflection.GetClassesByAttribute<ServiceAttribute>())
             {
-                var eventAttrs = type.GetCustomAttributes<ParseEventAttribute>();
+                var eventAttrs = type.GetCustomAttributes<EventDependsAttribute>();
                 var serviceAttr = type.GetCustomAttribute<ServiceAttribute>();
 
                 if (serviceAttr != null)
@@ -110,9 +110,10 @@ namespace Konata.Core.Component
                                 }
                                 else LogW(TAG, $"This message cannot be processed. { ssoFrame.Command }");
                             }
-                            catch
+                            catch (Exception e)
                             {
                                 LogW(TAG, $"Thrown an exception while processing a message. { ssoFrame.Command }");
+                                LogE(TAG, e);
                             }
                         }
                         else LogW(TAG, $"Unsupported sso frame received. { ssoFrame.Command }");
