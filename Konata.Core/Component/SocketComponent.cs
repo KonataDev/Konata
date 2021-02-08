@@ -182,7 +182,7 @@ namespace Konata.Core.Component
                         {
                             // Move remain data to ahead
                             Array.Copy(_recvBuffer, _packetLength, _recvBuffer, 0, _recvLength);
-                            
+
                             // Process it again!
                             goto ReceiveNext;
                         }
