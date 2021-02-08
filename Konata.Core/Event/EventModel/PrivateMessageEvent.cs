@@ -5,21 +5,15 @@ using Konata.Core.Message;
 
 namespace Konata.Core.Event.EventModel
 {
-    public class GroupMessageEvent : ProtocolEvent
+    public class PrivateMessageEvent : ProtocolEvent
     {
-        public string GroupName { get; set; }
+        internal byte[] SyncCookie { get; set; }
 
-        public uint GroupUin { get; set; }
-
-        public uint MemberUin { get; set; }
-
-        public string MemberCard { get; set; }
+        public uint FriendUin { get; set; }
 
         public List<MessageChain> Message { get; set; }
 
-        public uint MessageId { get; set; }
-
-        public uint MessageTime { get; set; }
+        public bool IsFromTemporary { get; set; }
 
         public uint SliceTotal { get; set; }
 
@@ -40,8 +34,5 @@ namespace Konata.Core.Event.EventModel
 
             return content;
         }
-
-        public GroupMessageEvent()
-            => WaitForResponse = true;
     }
 }

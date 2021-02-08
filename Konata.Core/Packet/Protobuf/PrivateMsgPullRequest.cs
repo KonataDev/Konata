@@ -3,9 +3,9 @@ using Konata.Utils.Protobuf;
 
 namespace Konata.Core.Packet.Protobuf
 {
-    public class ProtoGetMsg : ProtoTreeRoot
+    public class PrivateMsgPullRequest : ProtoTreeRoot
     {
-        public ProtoGetMsg(byte[] syncCookie)
+        public PrivateMsgPullRequest(byte[] syncCookie)
         {
             AddLeafVar("08", 0);                          // sync_flag
             AddLeafBytes("12", syncCookie);               // sync_cookie

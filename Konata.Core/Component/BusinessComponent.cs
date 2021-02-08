@@ -141,6 +141,18 @@ namespace Konata.Core.Component
                     SessionSequence = groupMessage.SessionSequence,
                 });
 
+        internal async void PrivateMessagePulldown()
+            => await PostEvent<PacketComponent>(new PrivateMessagePullEvent
+            {
+                SyncCookie = GetComponent<ConfigComponent>().SignInfo.SyncCookie
+            });
+
+        internal void ConfirmPrivateMessage(PrivateMessageEvent privateMessage)
+        {
+            GetComponent<ConfigComponent>().SignInfo.SyncCookie
+                = privateMessage.SyncCookie;
+        }
+
         private async Task<WtLoginEvent> WaitForUserOperation()
         {
             _userOperation = new TaskCompletionSource<WtLoginEvent>();
@@ -159,6 +171,16 @@ namespace Konata.Core.Component
                 // Confirm with server about we have read group message
                 case GroupMessageEvent groupMessageEvent:
                     ConfirmReadGroupMessage(groupMessageEvent);
+                    goto default;
+
+                // Pull the private message when notified
+                case PrivateMessageNotifyEvent _:
+                    PrivateMessagePulldown();
+                    break;
+
+                // Confirm with server about we have read private message
+                case PrivateMessageEvent privateMessageEvent:
+                    ConfirmPrivateMessage(privateMessageEvent);
                     goto default;
 
                 // Pass messages to upstream

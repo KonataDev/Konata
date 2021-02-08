@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 using Konata.Utils.IO;
 
@@ -72,16 +71,14 @@ namespace Konata.Core.Packet
                     output._session = ByteConverter.BytesToUInt32(session, 0);
                 }
 
-                read.TakeUintBE(out zeroUint);
+                read.TakeBoolBE(out var isCompressed, 4);
                 {
-                    if (zeroUint != 0)
-                        return false;
-                }
-
-                read.TakeBytes(out var bytes,
-                    ByteBuffer.Prefix.Uint32 | ByteBuffer.Prefix.WithPrefix);
-                {
-                    output._payload = new ByteBuffer(bytes);
+                    read.TakeBytes(out var bytes,
+                        ByteBuffer.Prefix.Uint32 | ByteBuffer.Prefix.WithPrefix);
+                    {
+                        output._payload = new ByteBuffer
+                            (isCompressed ? Deflate.Decompress(bytes) : bytes);
+                    }
                 }
             }
 
