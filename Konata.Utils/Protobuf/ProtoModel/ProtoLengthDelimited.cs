@@ -28,5 +28,11 @@ namespace Konata.Utils.Protobuf.ProtoModel
 
         public override string ToString()
             => Encoding.UTF8.GetString(Value);
+
+        public static explicit operator string(ProtoLengthDelimited value)
+            => value.ToString();
+
+        public static explicit operator byte[](ProtoLengthDelimited value)
+            => value.Value;
     }
 }

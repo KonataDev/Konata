@@ -10,13 +10,16 @@ namespace Konata.Utils.Protobuf
 
     public class ProtoTreeRoot : IProtoType
     {
-        private ProtoLeaves _leaves;
+        private byte[] RawData { get; set; }
+
+        private ProtoLeaves Leaves { get; set; }
+
         public delegate void TreeRootWriter(ProtoTreeRoot tree);
         public delegate void TreeRootReader(ProtoTreeRoot tree);
 
         public ProtoTreeRoot()
         {
-            _leaves = new ProtoLeaves();
+            Leaves = new ProtoLeaves();
         }
 
         public ProtoTreeRoot(byte[] data, bool recursion)
@@ -28,7 +31,7 @@ namespace Konata.Utils.Protobuf
 
         public void AddTree(ProtoTreeRoot value)
         {
-            _leaves = value._leaves;
+            Leaves = value.Leaves;
         }
 
         public void AddTree(string treePath, ProtoTreeRoot value)
@@ -81,10 +84,10 @@ namespace Konata.Utils.Protobuf
 
         private void AddLeaf(string leafPath, IProtoType leaf)
         {
-            if (!_leaves.TryGetValue(leafPath, out var list))
+            if (!Leaves.TryGetValue(leafPath, out var list))
             {
                 list = new List<IProtoType>();
-                _leaves.Add(leafPath, list);
+                Leaves.Add(leafPath, list);
             }
 
             list.Add(leaf);
@@ -199,7 +202,7 @@ namespace Konata.Utils.Protobuf
 
         public IProtoType GetLeaf(string leafPath)
         {
-            if (_leaves.TryGetValue(leafPath, out var list))
+            if (Leaves.TryGetValue(leafPath, out var list))
             {
                 if (list.Count > 0)
                 {
@@ -211,7 +214,7 @@ namespace Konata.Utils.Protobuf
 
         public List<IProtoType> GetLeaves(string leafPath)
         {
-            if (_leaves.TryGetValue(leafPath, out var list))
+            if (Leaves.TryGetValue(leafPath, out var list))
             {
                 return list;
             }
@@ -223,7 +226,7 @@ namespace Konata.Utils.Protobuf
 
         public void ForEach(TreeRootEnumerator callback)
         {
-            foreach (var node in _leaves)
+            foreach (var node in Leaves)
             {
                 foreach (var element in node.Value)
                 {
@@ -231,6 +234,9 @@ namespace Konata.Utils.Protobuf
                 }
             }
         }
+
+        public IProtoType PathTo(string leafPath)
+            => PathTo(this, leafPath);
 
         #endregion
 
@@ -302,7 +308,7 @@ namespace Konata.Utils.Protobuf
         {
             var buffer = new ByteBuffer();
             {
-                foreach (var node in root._leaves)
+                foreach (var node in root.Leaves)
                 {
                     var pbBytes = new byte[0];
 
@@ -353,7 +359,7 @@ namespace Konata.Utils.Protobuf
         /// <returns></returns>
         public static ProtoTreeRoot Deserialize(byte[] data, bool recursion)
         {
-            var tree = new ProtoTreeRoot();
+            var tree = new ProtoTreeRoot { RawData = data };
             var buffer = new ByteBuffer(data);
             {
                 while (buffer.RemainLength > 0)
@@ -408,5 +414,8 @@ namespace Konata.Utils.Protobuf
             }
             return tree;
         }
+
+        public static explicit operator ProtoLengthDelimited(ProtoTreeRoot root)
+            => ProtoLengthDelimited.Create(root.RawData);
     }
 }
