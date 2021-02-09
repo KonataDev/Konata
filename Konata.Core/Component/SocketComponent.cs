@@ -30,7 +30,7 @@ namespace Konata.Core.Component
 
         private static ServerInfo[] DefaultServers { get; } =
         {
-            // new ServerInfo { Host = "127.0.0.1", Port = 8080 },
+            new ServerInfo { Host = "127.0.0.1", Port = 8080 },
             new ServerInfo { Host = "msfwifi.3g.qq.com", Port = 8080 },
             new ServerInfo { Host = "14.215.138.110", Port = 8080 },
             new ServerInfo { Host = "113.96.12.224", Port = 8080 },

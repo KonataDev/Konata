@@ -7,7 +7,8 @@ namespace Konata.Core.Event
         public enum Type
         {
             Send,
-            Receive
+            Receive,
+            //SendAction
         }
 
         public Type EventType { get; set; }

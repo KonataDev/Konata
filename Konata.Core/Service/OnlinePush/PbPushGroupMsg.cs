@@ -167,6 +167,11 @@ namespace Konata.Core.Service.OnlinePush
         }
 
         public bool Build(Sequence sequence, ProtocolEvent input, SignInfo signInfo,
-            out int newSequence, out byte[] output) => throw new NotImplementedException();
+            out int newSequence, out byte[] output)
+        {
+            output = null;
+            newSequence = 0;
+            return false;
+        }
     }
 }
