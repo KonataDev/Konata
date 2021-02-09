@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
-using Konata.Core.Event.EventModel;
 using Konata.Core.Entity;
+using Konata.Core.Message;
 using Konata.Core.Component;
+using Konata.Core.Event.EventModel;
 
 namespace Konata.Core
 {
@@ -48,5 +50,14 @@ namespace Konata.Core
         /// <param name="toggleAdmin"><b>[In]</b> Flag to toggle set or unset. </param>
         public Task<GroupPromoteAdminEvent> GroupPromoteAdmin(uint groupUin, uint memberUin, bool toggleAdmin)
             => GetComponent<BusinessComponent>().GroupPromoteAdmin(groupUin, memberUin, toggleAdmin);
+
+        /// <summary>
+        /// Send group message
+        /// </summary>
+        /// <param name="groupUin"></param>
+        /// <param name="message"></param>
+        /// <returns></returns>
+        public Task<GroupMessageEvent> SendGroupMessage(uint groupUin, List<MessageChain> message)
+            => GetComponent<BusinessComponent>().SendGroupMessage(groupUin, message);
     }
 }

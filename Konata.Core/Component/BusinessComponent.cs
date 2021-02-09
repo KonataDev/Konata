@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using Konata.Core.Event;
 using Konata.Core.Event.EventModel;
 using Konata.Core.Entity;
+using Konata.Core.Message;
+using System.Collections.Generic;
 
 namespace Konata.Core.Component
 {
@@ -158,6 +160,14 @@ namespace Konata.Core.Component
             _userOperation = new TaskCompletionSource<WtLoginEvent>();
             return await _userOperation.Task;
         }
+
+        public async Task<GroupMessageEvent> SendGroupMessage(uint groupUin, List<MessageChain> message)
+          => (GroupMessageEvent)await PostEvent<PacketComponent>
+            (new GroupMessageEvent
+            {
+                GroupUin = groupUin,
+                Message = message
+            });
 
         internal override void EventHandler(KonataTask task)
         {
